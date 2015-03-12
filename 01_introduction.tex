@@ -10,7 +10,7 @@ In \citetitle{Atzori2010} \cite{Atzori2010}, Luigi Atzori et Al. pointed out tha
 
 In addition, mobile devices (like mobile phones) have steadily growing capabilities, enhancing the features of IoT. These phones can for instance use a network of devices, or act as one node of the network. In the augmented maps example, hovering a tag with the mobile phone would trigger a web service call that would provide the device owner information about any point of interest, as hotels, restaurants, monuments or events. Such an integration of mobile devices into distributed systems leads to the fact that the computation could happen anywhere (or everywhere) and in any format. In other words, it leads to Ubiquitous Computing, often described as pervasive computing and explained by Mark Weiser as "Specialized elements of hardware and software, connected by wires, radio waves and infrared, will be so ubiquitous that no one will notice their presence" \cite{Computer_21Century}.
 
-The Ubiquitous Computing is not something new, but it is getting more and more traction as the technologies, hardware or software (like middleware libraries) evolve. Jan Krikke assesses that "Interest has shifted from desktop computers to mobile computers such as cell phones, wearable computers, and advanced PDA-like devices such as Ubiquitous Communicator terminals". It can be therefore assumed that embedded and interconnected devices will be more and more present in the future.
+The Ubiquitous Computing is not something new, but it is getting more and more traction as the technologies, hardware or software (like middleware libraries) evolve. Jan Krikke assesses that "Interest has shifted from desktop computers to mobile computers such as cell phones, wearable computers, and advanced PDA-like devices such as Ubiquitous Communicator terminals"\cite{Krikke2005}. It can be therefore assumed that embedded and interconnected devices will be more and more present in the future.
 
 In their paper, luigi Atzori et Al. also identify open issues that remain yet to be tackled for a better IoT. The IoT shows a need for standardization, as researches are conducted in many different places; it also has to respond to networking and addressing issues, since the IoT will inexorably lead to a number of network nodes that cannot be handled by the existing architectures and protocols (IPv4 for example is too limited in terms of addresses range). The last issue is the security and privacy one. The security theme encompasses protection against physical attack of the devices,  protection against eavesdropping, authentication of the different components, and data integrity. Privacy is the fact that personal information should be kept secret, or given to only authorized entities. 
 
@@ -72,7 +72,7 @@ When the Consumer Operator requests which other Consumer Operator operates a spe
 In the end, four entities must be authenticated: the Consumers, the Aggregators and the Consumer Operators must be authenticated within Domain Operators, the Vendors and the Consumer Operators within the Root Domain Operator.
 
 \subsection{Different Technologies}
-Concerning the technology that will be used, several choices are possible. One could rely on a Password-authenticated key agreement \cite{Hao2011}\cite{Pointcheval2012}\cite{Juang2008}, symmetric or asymmetric encryption\cite{Woo1997}, on the Diameter protocol, the kerberos protocol, the Otway–Rees protocol, openID and openID connect or some others. 
+Concerning the technology that will be used, several choices are possible. One could rely on a Password-authenticated key agreement \cite{Hao2011}\cite{Pointcheval2012}\cite{Juang2008}, symmetric or asymmetric encryption\cite{Woo1997}\cite{Denning1982}, on the Diameter protocol, the kerberos protocol\cite{Sundareswaran}, the Otway–Rees protocol, openID\cite{Ghazizadeh} and openID connect, SPX\cite{Tardo1991} or some others. A. Liebl tried in 1994 to list the possible authentication protocols, his list is given in appendix 1.
 
 However, in terms of security breaches and potential attack when it comes to distributed systems, it seems that a few possibilities stand out: a Kerberos based system, an OpenID system, or a system based on an OAuth protocol (like OpenID connect). More details will be given is chapter \ref{cha:conceptanddesign}.
 
@@ -84,7 +84,7 @@ If the use of libraries is chosen, the a specific library should be elected. Tal
 \section{Aim and Objectives}
 Every Domain Operator (Root or not) should be then able to authenticate other actors of the \emph{device cloud}.
 
-For that, the design of a user directory should be performed. This user directory is maintained locally by every Domain Operator for authenticating their own "users" (which can be one of the four entities described above). The User Directory used in the \emph{device cloud} should have the same implementation for every Domain Operator, and thus should implement the required level of abstraction to be used indifferently in any Operator.
+For that, a user directory should be designed. This user directory is maintained locally by every Domain Operator for authenticating their own "users" (which can be one of the four entities described above). The User Directory used in the \emph{device cloud} should have the same implementation for every Domain Operator, and thus should implement the required level of abstraction to be used indifferently in any Operator.
 
 Since several Domain Operators exist at the same time, it is legitimate to specify where should which entity's record be kept. For example, a Consumer Operator is susceptible to communicate with any other Operator. Therefore, a Domain Operator can have in its User Directory an entry for any other Operator. In the contrary, a Consumer or an Aggregator is supposed to communicate only with its Operator. It is subsequently mandatory, that an Operator stores information only about their own consumers and aggregators.
 
@@ -101,11 +101,13 @@ M. Mackay et Al. recently identified the major threats in a cloud-based system a
 
 To those threats the risks related to the physical presence of sensors like destruction or damaging(8) can be added .
 
-As for the User Directory, the design should respond to the issues 1, 6 and 7. The DDoS attacks(2) are performed on the network, and thus cannot be prevented by the design of a single component. The same argument can be given for end-to-end issues(5). Equipment failures(4), as equipment destruction or damaging(8), are absolutely not related to the design and implementation of a User Directory. Hence, it is out of the scope of this thesis. Finally, handling insiders attacks is more about predicting and detecting than preventing, and is based on observation of patterns and users behavior that are not visible to the User Directory\cite{Schultz2002}.
+As for the User Directory, the design should respond to the issues 1, 6 and 7. The DDoS attacks(2) are performed on the network, and thus cannot be prevented by the design of a single component. The same argument can be given for end-to-end issues(5). Equipment failures(4), as equipment destruction or damaging(8), are absolutely not related to the design and implementation of a User Directory. Hence, it is out of the scope of this thesis. 
 
-In the contrary, Hacking attacks, Espionage and Data loss or corruption can be handled through data encryption, signatures, and other security standards (handling SQL injection, XSS attacks, etc). Thus, it must be ensured that the User Directory provides a sufficient security level in regards to those issues, while being easily integrable into the global design. 
+Handling with insiders attacks is more about predicting and detecting than preventing, and is based on observation of patterns and users behavior that are not visible to the User Directory\cite{Schultz2002}. However, it can be ensured that an authorized participant cannot access protected information with which it could harm the system.
 
+Hacking attacks, Espionage and Data loss or corruption can be handled through data encryption, signatures, or other security standards (handling SQL injection, XSS attacks, etc). Thus, it must be ensured that the User Directory provides a sufficient security level in regards to those issues, while being easily integrable into the global design. 
 
+Finally, privacy should be also ensured.
 
 
 \section{Outline}

@@ -1,10 +1,47 @@
 \chapter{Appendix 1}
-\label{appendix:listing1}
+\label{appendix:protocol_list}
 
-\lstset{language=PHP}
-\begin{lstlisting}
-for($i=1; $i<123; $i++)
-{
-    echo "work harder! ;)";
-}
-\end{lstlisting}
+The following table lists the protocols available in 1993 for performing authentication in a distributed system. The bugs and redundancies information is also based on the knowledge people had at that time. It has been extracted from \citetitle{Liebl1993}\cite{Liebl1993}.
+
+The types column correspond to the encryption type: it can be based on a public key (PK), a secret key (SK) or on a one-way function (OF).
+	\begin{table}[!ht]
+		\centering
+		\caption{Table of Protocols}
+		\begin{tabular}{| l | l | l | c | c |}
+			\hline
+			Protocol & Type & Year & Bugs & Redundancies \\
+			\hline
+			Needham-Schroder & PK & 1978 & y & y \\
+			\hline
+			Needham-Schroder & SK & 1978 & y & y \\
+			\hline
+			Denning-Sacco & SK & 1981 &  &  \\
+			\hline
+			Andrew Secure RPC & SK & 1985 & y & y \\
+			\hline
+			Needham-Schroeder & SK & 1987 &  &  \\
+			\hline
+			CCITT X.509 & PK & 1987 & y & y \\
+			\hline
+			STS & PK & 1987 &  &  \\
+			\hline
+			Otway-Rees & SK & 1987 &  & y \\
+			\hline
+			Kerberos V4 & SK & 1988 &  & y \\
+			\hline
+			Gong & OF & 1989 &  &  \\
+			\hline
+			Lomas et al. & PK/SK & 1989 &  &  \\
+			\hline
+			SPX & PK & 1991 &  &  \\
+			\hline
+			Davis-Swick & SK & 1990 &  &  \\
+			\hline
+			KATHY & PK & 1990 &  &  \\
+			\hline
+			Kehne et al. & SK & 1992 &  &  \\
+			\hline
+			Kerberos V5 & SK & 1992 &  &  \\
+			\hline
+		\end{tabular}
+	\end{table}
