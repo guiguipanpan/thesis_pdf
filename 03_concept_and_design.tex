@@ -1,0 +1,38 @@
+\chapter{Concept and Design}
+\label{cha:conceptanddesign}
+
+\section{Global Design}
+A few details about the global design must still be introduced.
+
+
+
+The operators must then be granted with this right. For this reason, an additional operator has been added on top of the normal operators, the so-called Root Domain Operator, used to store global knowledge about devices. This Root Domain Operator maintains also a User Directory, used to authenticate normal operators, called Domain Operators. This User Directory differs from the ones of the normals operators and will thus be out of the scope of this thesis.
+
+
+The corresponding architecture is given in Figure \ref{fig:concept__architecture}
+
+
+
+\section{Technological and Design Choices}
+As stated in the introduction, a user directory will be used. However, the authentication process in itself (storage of keys, users, use of LDAP) is not integrated into the user directory. The first choice to make is thus whether the system will lie on a user directory wrapped onto an standard IAM (Identity and Access Management) service, or if a dedicated database should be also designed and connected to the User Directory.
+
+Then, the different authentication method /  protocol used for the three type of entities (Operators, Aggregators, Customers) should be chosen based on the requirements. The solution that has been chosen for the consumer and aggregator entities is a private-public key based authentication. Between Operator, the most plausible solution seems to be an OpenID connect system, but the technology still needs to be carefully evaluated and assessed. 
+
+Afterwards, a detailed solution must be designed that can be integrated in the already existing global system. From this system, and from the global requirements, it has been determined that the user directory should maintain the following entities:
+\begin{description}
+	\item[Aggregator entity] The Aggregator entity is used to authenticate an Aggregator within the context of an Operator
+	\item[Consumer entity] The Consumer entity is used to authenticate the Consumers within the context of an Operator and link additional information such as the Consumer Profile.
+	\item[Consumer profile] The Consumer profile describes the set of devices required by the Consumer and the set of aggregation layer modules required by the Consumer's applications to process the data recorded from the devices
+	\item[Operator entity] The Operator entity is used to authenticate an Operator and store contact information. It contains following properties
+	\begin{itemize}
+		\item \emph{DomainOperator}: Flag indicating whether the entity refers to Domain or a Consumer Operator.
+		\item \emph{ProtocolURI}: Defines the URI of the communication protocols used to interact with the Operator.
+	\end{itemize}
+	\item[Vendor entity] The Vendor entity is representing knowledge contributing entities being able to be	authenticated by the IAM service of an Operator
+\end{description}
+%\begin{figure}[!ht]
+%	\centering
+%	\includegraphics[width=0.5\textwidth]{images/snet_logo_gray.png}\\
+%	\caption{Lorem ipsum}
+%	\label{fig:introduction__loremipsum}
+%\end{figure}
