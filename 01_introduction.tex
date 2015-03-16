@@ -14,7 +14,13 @@ The Ubiquitous Computing is not something new, but it is getting more and more t
 
 In their paper, luigi Atzori et Al. also identify open issues that remain yet to be tackled for a better IoT. The IoT shows a need for standardization, as researches are conducted in many different places; it also has to respond to networking and addressing issues, since the IoT will inexorably lead to a number of network nodes that cannot be handled by the existing architectures and protocols (IPv4 for example is too limited in terms of addresses range). The last issue is the security and privacy one. The security theme encompasses protection against physical attack of the devices,  protection against eavesdropping, authentication of the different components, and data integrity. Privacy is the fact that personal information should be kept secret, or given to only authorized entities. 
 
-Authorization and authentication are therefore one of the main issues in distributed system applications. This thesis will mainly discuss these two security problems within a specific network. 
+Authorization and authentication are therefore one of the main issues in distributed system applications. 
+
+The way both were handled in distributed systems evolved a lot in the last decades. In the past, a user had one password per service for which it had to be authenticated. As the number of such systems was restrained, this could work fairly good. But this system is not really scalable. In a big distributed system, having one password per user and per service require much effort from the user and a lot of capacity for the service providers. 
+
+Recently, the term Single-Sign-On (SSO) appeared, in which a user authenticates just once for a set of different services. Google and Facebook, for example, implemented such a system, i.e., when a user wants to access a service X, instead of creating an account and signing in for X, it can simply connect to its Google Account and then access X. Of course the underlying process may be more complicated, but from the user's point of view, it isn't. Besides, the service providers like X don't have to maintain credentials for every user. For them, the system is also made easier.
+
+But such an authorization and authentication system may be complicated to set up in a proper manner. Trust, efficiency, completeness are example of issues that must be taken into consideration. This thesis will mainly discuss the design of such an authentication and authorization framework within a specific network. 
 
 \section{Context of this thesis}
 
@@ -40,7 +46,7 @@ Of course, the \emph{device cloud} must implement an authentication and an autho
 
 
 \section{The problem}
-The complexity of the authorization and authentication system is at least twofold: it lies both in the variety of actors and entities, and in the variety of existing solutions and protocols.
+The complexity of the authorization and authentication system is at least threefold: it lies in the variety of actors and entities, in the variety of existing solutions and protocols, and in the restrictions inherent to the devices.
 
 \subsection{Various actors} 
 For better understanding of which entity must be authenticated, a simplified structure of the \emph{devices cloud} is depicted in Fig \ref*{fig:concept__architecture}. This architecture, which will be thoroughly explained in chapter \ref{cha:relatedwork}, includes the following entities:
@@ -63,9 +69,10 @@ For better understanding of which entity must be authenticated, a simplified str
 In this architecture, the Domain Operators take the role of Device Operator and act as service providers. The devices they operate are grouped within aggregators, a virtual layer (software entity) that integrates devices and which is generally situated where the devices are. It contains among other the required middleware for loading the drivers and software that a device needs, and for establishing a reliable communication channel between the devices and the other actors. Since aggregators communicate with other entities, it has to be authenticated.
 
 Besides, the process of provisioning a device involves several steps and management services like accounting or decision making. In order to hide this complexity from the end users (i.e. Consumers), an Operator, called Consumer Operator, has been introduced. A Domain Operator can have several Consumer Operators, each handling different customers and devices. When a customer wants access to a device, it requests its Consumer Operator first. The customer, requiring access to a protected resource, needs to be authenticated. 
-\\It can happen that the Consumer Operator doesn't operate the specific device. In this case, it must request which other Consumer Operator owns the device. Once it will have retrieved this information, if the two Consumer Operators are bound by a contract, the device's access can be provided. Of course, the requesting Customer operator must be authenticated within the Domain of the other one.
 
-In the previous scenario, the Consumer Operator needs to know which other Consumer Operator handles a specific device. For this request to succeed, global knowledge has to be stored. Which device is operated by which operator for example. In the same way, it is assumed that the Operators are provided with all the knowledge which is required for operating a device and thus authenticate it. But when integrating a new unknown device, this knowledge must be first retrieved. \\Therefore, in the already defined system, two other entities have been introduced: the so-called Root Domain Operator is placed on top of the Domain Operators and stores global knowledge about devices and existing Operators; the Vendor Entity represent vendors (of devices), which are part of the global process and furnish knowledge about the different devices. Since the Vendors communicate with the Root Domain Operator about protected and required knowledge, it must also be authenticated within the Root Domain Operator. 
+It can happen that the Consumer Operator doesn't operate the specific device. In this case, it must request which other Consumer Operator owns the device. Once it will have retrieved this information, if the two Consumer Operators are bound by a contract, the device's access can be provided. Of course, the requesting Customer operator must be authenticated within the Domain of the other one.
+
+In the previous scenario, the Consumer Operator needs to know which other Consumer Operator handles a specific device. For this request to succeed, global knowledge has to be stored. Which device is operated by which operator for example. In the same way, it is assumed that the Operators are provided with all the knowledge which is required for operating a device. But when integrating a new unknown device, this knowledge must be first retrieved. \\Therefore, in the already defined system, two other entities have been introduced: the so-called Root Domain Operator is placed on top of the Domain Operators and stores global knowledge about devices and existing Operators; the Vendor Entity represent vendors (of devices), which are part of the global process and furnish knowledge about the different devices. Since the Vendors communicate with the Root Domain Operator about protected and required knowledge, it must also be authenticated within the Root Domain Operator. 
 
 When the Consumer Operator requests which other Consumer Operator operates a specific device, the requesting Consumer Operator acts for the Root Domain Operator as a client requesting access to a protected resource, and must then be authenticated by the Root Domain Operator.
 
@@ -74,19 +81,36 @@ In the end, four entities must be authenticated: the Consumers, the Aggregators 
 \subsection{Different Technologies}
 Concerning the technology that will be used, several choices are possible. One could rely on a Password-authenticated key agreement \cite{Hao2011}\cite{Pointcheval2012}\cite{Juang2008}, symmetric or asymmetric encryption\cite{Woo1997}\cite{Denning1982}, on the Diameter protocol, the kerberos protocol\cite{Sundareswaran}, the Otway–Rees protocol, openID\cite{Ghazizadeh} and openID connect, SPX\cite{Tardo1991} or some others. A. Liebl tried in 1994 to list the possible authentication protocols, his list is given in appendix 1.
 
-However, in terms of security breaches and potential attack when it comes to distributed systems, it seems that a few possibilities stand out: a Kerberos based system, an OpenID system, or a system based on an OAuth protocol (like OpenID connect). More details will be given is chapter \ref{cha:conceptanddesign}.
+It has been decided to use OpenID Connect as authentication framework (with Oauth as authorization frameworkt).
 
 After the protocol has been chosen, it should be decided if the implementation must be done from scratch, or with help of libraries. The use of libraries facilitates the implementation, but it should be reminded that this work will eventually be integrated into an already existing bigger project. In that sense, homogeneity and transparency are also issues that one has to consider. 
 
-If the use of libraries is chosen, the a specific library should be elected. Talking about OpenID connect, which is quite recent, six libraries at least are available. Kerberos, a much older protocol, can be implemented from basically any existing security framework. 
+In this thesis, MitreID, a Java library, has been elected.
 
+{ \huge TODO: REVIEW THE SOLUTION }
+
+%Regarding breaches and potential attack when it comes to distributed systems, it seems that a few possibilities stand out: a Kerberos based system, an OpenID system, or a system based on an OAuth protocol (like OpenID connect). More details will be given is chapter \ref{cha:conceptanddesign}.
+
+
+
+%If the use of libraries is chosen, the a specific library should be elected. Talking about OpenID connect, which is quite recent, six libraries at least are available. Kerberos, a much older protocol, can be implemented from basically any existing security framework. 
+
+\subsection{Devices Restriction}
+When implementing an authentication and authorization layer in the \emph{devices cloud}, it should be taken into consideration that a part of the implementation will eventually run on the devices platforms. 
+
+Within these platforms, resources are scarce and computation power low. Hence, heavy-weight libraries and protocols should be avoided.
 
 \section{Aim and Objectives}
 Every Domain Operator (Root or not) should be then able to authenticate other actors of the \emph{device cloud}.
 
-For that, a user directory should be designed. This user directory is maintained locally by every Domain Operator for authenticating their own "users" (which can be one of the four entities described above). The User Directory used in the \emph{device cloud} should have the same implementation for every Domain Operator, and thus should implement the required level of abstraction to be used indifferently in any Operator.
+For that, a User Directory should be designed. This User Directory is maintained locally by every Domain Operator for authenticating their own "users" (which can be one of the four entities described above). The User Directory used in the \emph{device cloud} should have the same implementation for every Domain Operator, and thus should implement the required level of abstraction to be used indifferently in any Operator.
 
-Since several Domain Operators exist at the same time, it is legitimate to specify where should which entity's record be kept. For example, a Consumer Operator is susceptible to communicate with any other Operator. Therefore, a Domain Operator can have in its User Directory an entry for any other Operator. In the contrary, a Consumer or an Aggregator is supposed to communicate only with its Operator. It is subsequently mandatory, that an Operator stores information only about their own consumers and aggregators.
+For the system to be complete, a client side (requesting authentication) will be also implemented. This client will for example be used by the vendors or the consumers and will communicate with the User Directory of their Operator. As said above, this client should be deployed onto the devices platform and should be thus be kept as light as possible.
+
+It should also be decided if this User Directory relies within each operator on a dedicated database (storing users, session information) or if it should be wrapped onto an existing IAM (Identity and Access Management) solution, or onto a LDAP for instance. In our case, the authorization and authentication framework is based on a dedicated database.
+{ \huge TODO: REVIEW THE SOLUTION }
+
+Since several Domain Operators exist at the same time, it is legitimate to specify where should which entity's record be kept. For example, a Consumer Operator is susceptible to communicate with any other Operator. Therefore, a Domain Operator can have in its User Directory an entry for any other Operator. On the contrary, a Consumer or an Aggregator is supposed to communicate only with its Operator. It is subsequently mandatory, that a Domain Operator stores information only about their own consumers and aggregators. In the same way, vendors information should be only stored in the Root Domain.
 
 M. Mackay et Al. recently identified the major threats in a cloud-based system as\cite{Mackay2012}: 
 \begin{enumerate}
