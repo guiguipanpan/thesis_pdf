@@ -49,7 +49,7 @@ Of course, the \emph{device cloud} must implement an authentication and an autho
 The complexity of the authorization and authentication system is at least threefold: it lies in the variety of actors and entities, in the variety of existing solutions and protocols, and in the restrictions inherent to the devices.
 
 \subsection{Various actors} 
-For better understanding of which entity must be authenticated, a simplified structure of the \emph{devices cloud} is depicted in Fig \ref*{fig:concept__architecture}. This architecture, which will be thoroughly explained in chapter \ref{cha:relatedwork}, includes the following entities:
+For better understanding of which entity must be handled, a simplified structure of the \emph{devices cloud} is depicted in Fig \ref*{fig:concept__architecture}. This architecture, which will be thoroughly explained in chapter \ref{cha:relatedwork}, includes the following entities:
 \begin{itemize}
 	\item Consumer
 	\item Aggregator
@@ -66,7 +66,7 @@ For better understanding of which entity must be authenticated, a simplified str
 	\label{fig:concept__architecture}
 \end{figure}
 
-In this architecture, the Domain Operators take the role of Device Operator and act as service providers. The devices they operate are grouped within aggregators, a virtual layer (software entity) that integrates devices and which is generally situated where the devices are. It contains among other the required middleware for loading the drivers and software that a device needs, and for establishing a reliable communication channel between the devices and the other actors. Since aggregators communicate with other entities, it has to be authenticated.
+In this architecture, the Domain Operators take the role of Device Operator and act as service providers. The devices they operate are grouped within aggregators, a virtual layer (software entity) that integrates devices and which is generally situated where the devices are. Typically, a consumer's mobile phone plays the role of the Aggregator and allows the consumer to handle every device. It contains among other the required middleware for loading the drivers and software that a device needs, and for establishing a reliable communication channel between the devices and the other actors. Since aggregators communicate with other entities, it has to be authenticated.
 
 Besides, the process of provisioning a device involves several steps and management services like accounting or decision making. In order to hide this complexity from the end users (i.e. Consumers), an Operator, called Consumer Operator, has been introduced. A Domain Operator can have several Consumer Operators, each handling different customers and devices. When a customer wants access to a device, it requests its Consumer Operator first. The customer, requiring access to a protected resource, needs to be authenticated. 
 
@@ -77,6 +77,8 @@ In the previous scenario, the Consumer Operator needs to know which other Consum
 When the Consumer Operator requests which other Consumer Operator operates a specific device, the requesting Consumer Operator acts for the Root Domain Operator as a client requesting access to a protected resource, and must then be authenticated by the Root Domain Operator.
 
 In the end, four entities must be authenticated: the Consumers, the Aggregators and the Consumer Operators must be authenticated within Domain Operators, the Vendors and the Consumer Operators within the Root Domain Operator.
+
+The different processes among the \emph{devices cloud} involve also roles and authorization. An example for that is access revocation, which could be needed in the following case: an emergency occurs requiring customer A to have control over device D, but customer B is using the device D at that time. The access must then be revoked before the device is re-attributed to customer A. In this case, only the Device Owner or Device Operator can take such a decision. Roles and authorization must therefore be handled.
 
 \subsection{Different Technologies}
 Concerning the technology that will be used, several choices are possible. One could rely on a Password-authenticated key agreement \cite{Hao2011}\cite{Pointcheval2012}\cite{Juang2008}, symmetric or asymmetric encryption\cite{Woo1997}\cite{Denning1982}, on the Diameter protocol, the kerberos protocol\cite{Sundareswaran}, the Otway–Rees protocol, openID\cite{Ghazizadeh} and openID connect, SPX\cite{Tardo1991} or some others. A. Liebl tried in 1994 to list the possible authentication protocols, his list is given in appendix 1.
