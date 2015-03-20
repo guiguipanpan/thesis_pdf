@@ -19,6 +19,8 @@
 IoT
 ASCII
 TCP
+device
+devices
 }
 
 %make readable references
@@ -37,10 +39,13 @@ TCP
 	\URL{#1}\ifx\relax#2\relax\else - \URL{#2}\fi}
 \makeatother
 
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
 \usepackage{color, colortbl}
 \usepackage{pbox}
 \definecolor{Gray}{gray}{0.4}
 \usepackage{longtable}
+\usepackage{scrextend}
 
 
 
@@ -124,8 +129,8 @@ Berlin, \today \hspace{15 mm} Chuck Norris' son
 \newpage
 %\input{acknowledgments}				% "I would like to thank my teddybear..." and such stuff...
 
-\input{00_abstract}
-\thispagestyle{empty}
+%\input{00_abstract}
+%\thispagestyle{empty}
 
 \tableofcontents{\thispagestyle{empty}}
 
