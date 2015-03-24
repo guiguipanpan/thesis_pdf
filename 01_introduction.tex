@@ -21,7 +21,7 @@ The way both were handled in distributed systems evolved a lot in the last decad
 Recently, the term Single-Sign-On (SSO) appeared, in which a user authenticates just once for a set of different services. Google\footnote{Google Sign-In:  \url{https://developers.google.com/+/}} and Facebook\footnote{Facebook Login: \url{https://developers.facebook.com/docs/facebook-login/v2.2}}, for example, implemented such systems, i.e., when a user wants to access a service X, instead of creating an account and signing in for X, it can simply connect to its Google Account and then access X. Of course the underlying process may be more complicated, but from the user's point of view, it isn't. Besides, the service providers like X don't have to maintain credentials for every user. For them, the system is also made easier.
 
 But such an authorization and authentication system may be complicated to set up in a proper manner. Trust, privacy, completeness are example of issues that must be taken into consideration. This thesis will mainly discuss the design of an authentication and authorization framework within a specific network. 
-\\
+
 \section{Context of this thesis}
 
 Such a network can be used in possible future e-health applications, where devices are shared among users: in telemedicine applications, for instance, sensors are used to monitor vital signs of patients. The sensors belong to a specific entity (they could most likely be properties of the patient itself, or of a provider in case of research study for example), and the data collected by the sensors can be retrieved from the Internet in case another entity, like an hospital, wants to have access to the vital signs. 
@@ -43,7 +43,7 @@ In the proposed solution, many actors interact between each other. For the purpo
 The Operators, providing access to the devices (as service providers), also act as peers and have contracts between each other to provide access for their customers to a device operated by another Operator.
 
 Of course, the \emph{device cloud} must implement an authentication and an authorization layer to grant the right entity with the corresponding rights. As aforementioned, the access to a device is an example of a right that must be granted. This thesis will have for goal to design a robust authentication system responding to the devices cloud needs and fitting the roles and entities defined in such a cloud. 
-\\
+
 
 \section{The problem}
 The complexity of the authorization and authentication system is at least threefold: it lies in the variety of actors and entities, in the variety of existing solutions and protocols, and in the restrictions inherent to the devices.
@@ -92,7 +92,7 @@ In addition, it should be also taken into consideration that a part of the imple
 Within these platforms, resources are scarce and computation power can be low. Hence, heavy-weight framework and protocols should be avoided.
 
 { \huge TODO: REVIEW THE SOLUTION }
-\\
+
 %Regarding breaches and potential attack when it comes to distributed systems, it seems that a few possibilities stand out: a Kerberos based system, an OpenID system, or a system based on an OAuth protocol (like OpenID connect). More details will be given is chapter \ref{cha:conceptanddesign}.
 
 
@@ -136,7 +136,6 @@ Handling with insiders attacks is more about predicting and detecting than preve
 Hacking attacks, Espionage and Data loss or corruption can be handled through data encryption, signatures, or other security standards (handling SQL injection, XSS attacks, etc). Thus, it must be ensured that the User Directory provides a sufficient security level in regards to those issues, while being easily integrable into the global design. 
 
 Finally, privacy should be also ensured.
-\\
 
 \section{Outline}
 After the introduction to this thesis and its related background, BLABLABBLA

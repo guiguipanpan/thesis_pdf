@@ -1,7 +1,8 @@
 \chapter{Background}
 \label{cha:relatedwork}
+\chapterquote{Authentication is the process of determining whether someone or something is, in fact, who or what it is declared to be}{D.R. Patel - INFORMATION SECURITY: Theory and Practice}
 
-In this section, the global system known as \emph{devices cloud} will be first detailed. Afterwards, the reader will be introduced to the different possible protocols and technologies that could be used. Finally, an overview of the different researches and studies that have been previously performed will be given.
+In this section, the global system known as \emph{devices cloud} will be first detailed. Afterwards, the reader will be introduced to the different possible protocols and technologies that could be used and an overview of the different researches and studies that have been previously performed will be given.
  
 \section{The Devices Cloud}
 Integrating the requirements defined in the Introduction to a more detailed view of the global system, the Figure \ref{fig:design_complete} of the \emph{devices cloud} architecture . Of course, only the information relevant for this thesis is depicted.
@@ -150,6 +151,7 @@ The reader should now have a good knowledge of the global design and its require
 Encryption is one of the key principle of network security. It ensures that nobody can have access to protected information even if a message has been intercepted, by encoding the messages. Different algorithms and methods exist, so that only the recipient of a message can decrypt the encoded message.
 
 \subsection{symmetric key}
+\label{sec:02_symmetric_keys}
 Some algorithm or protocols are based on a symmetric key. It is assumed that both the sender and the recipient of the messages share a secret (the key). Only the two actors A and B can then encrypt and decrypt the messages thanks to this shared secret key.
 
 Of course, it is assumed that the underlying cryptosystem is strong, so that nobody can decrypt the messages without the key.
@@ -161,38 +163,269 @@ Other algorithms are based on asymmetric keys. This time, every entity has two k
 
 The idea underneath this system is that a message encrypted with $k_{p}$ can only be decrypted with $ k_{p}^{-1} $, and, the other way around, a message encrypted with $ k_{p}^{-1} $ can only be decrypted with $k_{p}$.
 
-Since the public key is accessible to anybody, a asymmetric key based system doesn't show the same key distribution problem.
+Since the public key is accessible to anybody, an asymmetric key based system doesn't show the same key distribution problem.
 
 \subsection{SSL}
-SSL is described in \citetitle{freier2011secure}\cite{freier2011secure} as a protocol that "allows client/server applications to communicate in a way that is designed to prevent eavesdropping, tampering, or message forgery".
+SSL is described\cite{freier2011secure} as a protocol that "allows client/server applications to communicate in a way that is designed to prevent eavesdropping, tampering, or message forgery".
+
+The symmetric key encryption is simpler and quicker than the asymmetric one, but asymmetric encryption is more resilient to attacks. SSL uses therefore asymmetric keys to build a symmetric key. This functioning is explained in the following simplified sequence:
+
+\begin{enumerate}
+	\item The client connects to the server and asks for authentication.
+	\item The server sends a certificate, signed by a certificate authority (CA) and containing the public key of the server.
+	\item The client checks with the CA if the certificate is valid. If it is, the server is assumed to be a trusted server providing secure service (like online billing).
+	\item The client generates a random session key, signs it with the server's public key and send it to the sever.
+	\item The server can decrypt the session key with its private key.
+\end{enumerate}
+
+It is here presupposed that a certificate authority exists. This can be a dedicated one (in this case, a standard browser would notify that the certificate is not secure) or a recognized one. In the latter case, every server has to buy a certificate from a known authority. The creation, verification and revocation of certificates requires a Public Key Infrastructure (PKI) to be established.
+
+SSL is also a protocol that lies between the transport layer (like TCP) and the application layer of the OSI model. It means, the process is completely transparent to the user and is done automatically. The most basic example is the online billing. When a user pays in Amazon, for example, he doesn't notice that it is using SSL, it is done automatically by the browser.
+
+it is therefore not unusual that an authorization and authentication process is implemented on top of a SSL secured connection.
+
 
 \section{Authentication}
+Authentication, as aforementioned, can rely on encryption, but other approaches are possible. This section aims at explaining what is authentication, and giving an overview of the different possible protocols. 
+
 \subsection{Principles}
+As explained in \citetitle{patel2008information}\cite{patel2008information}, authentication is the process of determining whether someone or something is, in fact, who or what it is declared to be.	In order to do so, the server needs to check the authenticity of a piece of information. This can be done through the following verification types:
+
+\begin{description}
+	\item[Proof by Knowledge] The user must send information that only he is supposed to know. It can be a password / login, or a challenge from the server for example (the user must answer to some questions, or recognize patterns, etc).
+	\item[Proof by Possession] The user authenticate with a property that only he is supposed to have. Examples are electronic ID cards or one time passwords on the mobile phone.
+	\item[Proof by Property] Something that the user is or does. It could be for instance DNA, retina, fingerprint, or signatures. 
+\end{description}
+
+For a more secure authentication, the above listed factors can be combined. The banking terminals, for example, are based on a knowledge and an ownership factor. The user must possess its card and know a PIN code.
+
+In regards to this thesis, only knowledge factors can be observed. On one hand, the Customers, Vendors have credentials, and can thus authenticate with a login / password. Aggregators and Operators, in the other hand, are not human being and cannot enter credentials. Details about their authentication will be given in section \ref{cha:TRUC}. //TODO
+
+Furthermore, two authentication types exist: the mutual authentication, where two parties authenticate within each other during the same process, and one-way authentication. Given the architecture and requirements of the \emph{device cloud}, only one-way authentication will be detailed. 
+
 \subsection{Based on a symmetric key}
+In a symmetric cryptosystem, a principal can indifferently encrypt and decrypt with its key. Without the knowledge of this key, an entity cannot create an encrypted message or decrypt an already encrypted one. Hence, the following authentication principle, called \emph{SYM}, can be deducted:
+
+\begin{quote}
+	\textit{If a principal can correctly encrypt a message using a key that the verifier believes is known
+	only to a principal with the claimed identity (outside of the verifier), this act constitutes sufficient proof of identity}
+\end{quote}
+
+The most basic authentication, with P and Q the two parties, can be thus proceeded as follows:
+
+\begin{tabbing}
+	\hspace{4em}\=\hspace{4em}\=\hspace{2em}\=\kill
+	\>  P \>  : \> create $m =$ "I am P" \\
+	\>    \>  : \> compute $m' = \lbrace m, Q \rbrace_{k}$ 				\\
+	\>  P $\rightarrow$ Q \>  : \> $m,m'$ \\
+	\>  Q \>  : \> verify $\lbrace m, Q \rbrace_{k} = m'$ \\
+		\>    \>  : \> if equal then accept, else reject \\
+\end{tabbing} 
+
+One of the main weakness of this sequence is replay attack. Indeed, if an entity could access the message $m,m'$ of the third step, it could send it to Q later on and thus masquerade P.
+
+The use of nonce or timestamps can then be used for protecting against those replay attacks:
+
+\begin{tabbing}
+	\hspace{4em}\=\hspace{4em}\=\hspace{2em}\=\kill
+	\>  P $\rightarrow$ Q\>  : \> create $m =$ "I am P" \\
+	\>  Q  \>  : \> generate nonce $n$	\\
+	\>  Q $\rightarrow$ P \>  : \> $n$ \\
+	\>  P  \>  : \> compute $m' = \lbrace P, Q, n \rbrace_{k}$ 				\\
+	\>  P $\rightarrow$ Q \>  : \> $m$ \\
+	\>  Q \>  : \> verify $\lbrace P, Q, n \rbrace_{k} = m$ \\
+	\>    \>  : \> if equal then accept, else reject \\
+\end{tabbing} 
+
+If an entity now replay the message $\lbrace P, Q, n \rbrace_{k}$, the nonce will not be valid anymore and thus successful replay attacks can be avoided.
+
+In regards to the choice between timestamps and nonce, it should be understood that the use of timestamps requires every entities clock to be synchronized, which might be difficult when the number of clocks gets high. Besides, if the replay attacks is executed fast enough, the timestamps could still be valid. Therefore, nonce are in general to be preferred.
+\label{02_timestamp_vs_nonce}
+
+When using such a symmetric cryptosystem, it is supposed that there exists one key per pair of entities. In a network of N entities, this would rise up to $\frac{N.(N-1)}{2}$ keys. In addition, every entity would have to maintain N keys. The scalability of the process is therefore not optimal. 
+
+For this reason, in the majority of the proposed protocols for distributed systems, a centralized authentication server A is introduced. This server shares a key $K_{X,A}$ with every other entity X. A lot of protocols have been proposed, many based on the one put forth by Needham and Schroeder\cite{needham1978using}. It has been improved for example twice by Denning\cite{denning1981timestamps}\cite{robling1982cryptography}, adding timestamps. 
+
+One could consider in the end a protocol as follows (with P, Q the two parties and A the centralized authentication server):
+
+\begin{tabbing}
+	\hspace{4em}\=\hspace{4em}\=\hspace{2em}\=\kill
+	\>  P $\rightarrow$ Q \>  : \> "I am P" \\
+	\>  Q  \>  : \> generate nonce $n$ \\
+	\>  Q $\rightarrow$ P \>  : \> $n$ \\
+	\>  P  \>  : \> compute $x = \lbrace P, Q, n \rbrace_{k_{P,A}}$ 				\\
+	\>  P $\rightarrow$ Q \>  : \> $x$ \\
+	\>  Q  \>  : \> compute $y = \lbrace P, Q, x \rbrace_{k_{Q,A}}$ 				\\
+	\>  Q $\rightarrow$ A \>  : \> $y$ \\
+	\>  A  \>  : \> recover $P,Q,x$ from $y$ with $k_{Q,A}$ \\
+	\>    \>  : \> recover $P,Q,n$ from $x$ with $k_{P,A}$ \\
+	\>    \>  : \> compute $m = \lbrace P,Q,n \rbrace_{k_{Q,A}}$ \\
+	\>  A $\rightarrow$ Q \>  : \> $m$ \\
+	\>  Q \>  : \> verify $\lbrace P, Q, n \rbrace_{k_{Q,A}} = m$ \\
+	\>    \>  : \> if equal then accept, else reject \\
+\end{tabbing} 
+
+Q uses A for translating a message encrypted with P's key to a message only encrypted with Q's key. This way, only N keys must be maintained. The major securities issues are here reported to the authorization server A, which must be protected with strong security systems.
+
+It must also be noted that the protocols described here are used only to check if the sender of a message is authentic. The following connections can then be facilitated with the creation of a session key, but it will not be detailed here.
+
 \subsection{Based on asymmetric keys}
+With an asymmetric cryptosystem, an entity P is the only one able to sign messages with $k_{P}^{-1}$, since it is supposed to be kept secret. Thus, if the decryption of a message by $k_{P}$ makes sense, it means that the message originally came from P. The principle \emph{ASYM} can be deducted:
+
+\begin{quote}
+	\textit{If a principal can correctly sign a message using the private key of the claimed identity, this act constitutes a sufficient proof of identity.}
+\end{quote}
+
+Similarly to the symmetric cryptosystem, a basic protocol can be conceived this way:
+
+\begin{tabbing}
+	\hspace{4em}\=\hspace{4em}\=\hspace{2em}\=\kill
+	\>  P $\rightarrow$ Q\>  : \> "I am P" \\
+	\>  Q  \>  : \> generate nonce $n$	\\
+	\>  Q $\rightarrow$ P \>  : \> $n$ \\
+	\>  P  \>  : \> compute $m = \lbrace P, Q, n \rbrace_{k_{P}^{-1}}$ 				\\
+	\>  P $\rightarrow$ Q \>  : \> $m$ \\
+	\>  Q \>  : \> verify $(P,Q,n) = \lbrace m \rbrace_{k_{P}}$ \\
+	\>    \>  : \> if equal then accept, else reject \\
+\end{tabbing} 
+
+Again, in a distributed network with N nodes, every node would have to maintain the public keys of the other entities. A centralized authentication server A can be inserted into the above described protocol:
+
+\begin{tabbing}
+	\hspace{4em}\=\hspace{4em}\=\hspace{2em}\=\kill
+	\>  P $\rightarrow$ Q\>  : \> "I am P" \\
+	\>  Q  \>  : \> generate nonce $n$	\\
+	\>  Q $\rightarrow$ P \>  : \> $n$ \\
+	\>  P  \>  : \> compute $m = \lbrace P, Q, n \rbrace_{k_{P}^{-1}}$ 				\\
+	\>  P $\rightarrow$ Q \>  : \> $m$ \\
+	\>  Q $\rightarrow$ A \>  : \> "I need P's public key" \\
+	\>  A \>  : \> retrieve P's public key $k_{P}$ \\
+	\>  A \>  : \> create certificate $c = \lbrace P, k_{P} \rbrace_{k_{A}^{-1}} $ \\
+	\>  A $\rightarrow$ Q \>  : \> $P,c$ \\
+	\>  Q \>  : \> verify $(P,Q,n) = \lbrace m \rbrace_{k_{P}}$ \\
+	\>    \>  : \> if equal then accept, else reject \\
+\end{tabbing} 
+
+Here, c, a \emph{public key certificate} is the belief that P's public key is $k_{P}$. In such a system, the different entities don't have to know the public keys of everyone from the beginning. Hence, the key distribution problem underlined in the section \ref{sec:02_symmetric_keys} can be avoided.
+
 \subsection{Based on a One-way function}
-Another possibility to authenticate principals is to rely on a so-called One-way function.
+Another possibility to authenticate principals is to rely on a so-called One-way function, and no more on key based encryption.
+
 \subsubsection{One-Way function}
 Such a function $f$ presents the following properties:
 \begin{itemize}
 	\item \textbf{Easy to compute:} \\
 	it can be computed in a polynomial time algorithm.
 	\item \textbf{Hard to invert:} \\
-	with ($f(x)$), finding $x$ is difficult. In mathematical terms,  for every randomized algorithm $A$ that runs in time polynomial in $n=|x|$, every polynomial $p(n)$, and all sufficiently large $n$: \\
+	from ($f(x)$) only, finding a corresponding $x$ must be difficult. In mathematical terms,  for every randomized algorithm $A$ that runs in time polynomial in $n=|x|$, every polynomial $p(n)$, and all sufficiently large $n$: \\
 	$ P_{r}[f(A(f(x))) = f(x)] < \dfrac{1}{p(x)}$ 
 	\item \textbf{(Optional) collision-free:} \\
 	it is unfeasible to find a collision, i.e. $f(x) = f(y)$ and $x \ne y$.
 \end{itemize}
 
-As for the symmetric key, it is assumed that the two communicating entities know the One-way function. The advantage of those functions in regards to a symmetric key is that it can be more easily designed than an encryption algorithm, since they don't have to be invertible, but only present the collision-free property. Indeed, for authentication, the collision-free property is particularly important because it is the only way to check the authenticity of a message.
+Similarly to the symmetric cryptosystem, it is assumed that the two communicating entities know the One-way function. The advantage of those functions in regards to a symmetric key is that it can be more easily designed than an encryption algorithm, since they don't have to be invertible, but only present the collision-free property. Indeed, for authentication, the collision-free property is particularly important because it is the only way to check the authenticity of a message.
 
-\subsubsection{Proposed prorocol}
+\subsubsection{Proposed protocol}
+One of the most famous protocols using one-way functions has been proposed by Li Gong\cite{Gong1989} in \citetitle{Gong1989}.
+
+In this protocol, the two parties share a secret with a centralized server A. Combined with nonces and secrets, 2 different one-way functions ensure that, after a 5 steps sequence, P and Q share a fresh secret that nobody else could have discovered.
+
+The use of such functions doesn't reduce capabilities of authentication systems, and can facilitate computation. They could also be use in a more elaborated authentication scheme, like a Kerberos-like system (see section \ref{sec:02_Kerberos}).
+
+\subsection{Other Approaches}
+
+\subsubsection{Password authenticated key exchange - PAKE}
+The password authenticated key exchange is an interactive method for two parties to create a session key based only on the knowledge of a password. This method doesn't require any PKI (it doesn't use SSL, for example) but ensure a secure communication.
+
+Unlike SSL based authentication, it is also not subject to man-in-the-middle attack. Indeed, if a user discloses its password on a phishing website, even if the session is SSL encrypted, the password will be stolen. In PAKE, the password is never revealed, only proofs of its knowledge are sent through the network.
+
+However, it requires that every pair of entities share a secret (like a password) from the beginning. This hypothesis can in practice become a unpractical, as the number of network nodes gets high and if the nodes can be dynamically integrated into the network.
+
+\subsection{TODO: Trust ?}
+
 \subsection{Shared Authentication Framework}
-\subsection{SSO}
+This section focus on frameworks that provide a unified authentication throughout a distributed system, with the most transparent from the end-user's point of view. Those systems can for instance rely on a protocol described above, but enhance this one with a global design and infrastructure. 
+
+In a shared authentication framework, the services collaborate together to provide a transparent authentication service. Two concepts must here be distinguished: Single-Sign-On (SSO) and Federated Identity Management (FIM).
+
+\subsubsection{SSO}
+SSO (Single-Sign-On) is a feature of a set of services, with which a user enters only once its credential for being able to access all services contained in the set, even when those services are not delivered by the same organization.
+\\
+ 
+\quad \tabitem	\textbf{Kerberos}
+
+\label{sec:02_Kerberos}
+Kerberos\cite{Sundareswaran} is a computer network authentication service developed as part of the Project Athena at MIT, and still today the leading service in the enterprise universe. Two major versions exist, the v4 and v5, which is known to make up for some weaknesses in the v4 version. Kerberos is based on the use of tickets, with which entities prove their identity, and it relies on symmetric encryption.
+
+The following entities are defined:
+\begin{description}
+	\item[Client]: the user to authenticate (and its client, like a web browser).
+	\item[Key Distribution Server (KDS)]: the Kerberos organization that delivers the different Kerberos services. Most of the time, it encompasses an Authentication Server and a Ticket Granting Server.
+	\item[Authentication Server (AS)]: the Kerberos server that authenticates the client. It delivers access tickets to the TGS.
+	\item[Ticket Granting Service (TGS)]: the Kerberos server that delivers tickets for a specific service and a specific user.
+	\item[Service Server (SS)]: the service the user wants to have access to. 
+\end{description}
+
+The authentication flow is depicted in Figure \ref{fig:kerberos}.
+
+\begin{figure}[!ht]
+	\centering
+	\caption{Kerberos authentication flow}
+	\label{fig:kerberos}
+	\includegraphics[scale=0.4]{images/kerberos}
+\end{figure}
+
+The following steps can be observed:
+\begin{enumerate}
+	\item The user first authenticate with the Authentication Server. This step consists only in sending the user ID in clear text (it is assumed that the user is already registered, and that the AS knows the keys of all its users).
+	\item The AS checks if it knows the user. If yes, it sends two messages back: 
+	\begin{enumerate}[label=\bfseries\Alph*)]
+		\item client TGS session key $k_{TGS/user}$ encrypted with $k_{user}$;
+		\item $TGT$ (Ticket Granting Ticket), which allows the client to contact the TGS. It contains the predefined TGS session key  $k_{TGS/user}$, along with the client ID, the client network address, the validity time of the ticket, etc. The $TGT$ is encrypted with $k_{TGS}$ so that only the TGS can decrypt it.
+	\end{enumerate}
+	The client can decrypt A but not B, since it doesn't know $k_{TGS}$. From what it now has, the client can request services access.
+	
+	\item The client requests a specific service, by sending the two following messages:
+	\begin{enumerate}[label=\bfseries\Alph*), resume]
+		\item $\lbrace TGT, service ID \rbrace$
+		\item $Authenticator=\lbrace client ID, timestamp \rbrace$ encrypted with $k_{TGS/user}$ 
+	\end{enumerate}
+	Once again, only the TGS can decrypt both of the messages.
+	
+	\item When receiving message \textbf{C} and \textbf{D}, the TGS verify that the ticket $TGT$ is valid and decrypt the $Authenticator$ with the session key of the user. It is assumed here that every services are formerly registered to the TGS, so that the TGS has the key of the required service. If it has it, it then sends the two following messages:
+	\begin{enumerate}[label=\bfseries\Alph*), resume]
+		\item Client / SS session key $k_{SS/user}$ encrypted with $k_{TGS/user}$.
+			\item Client to AS Ticket, containing information aimed at the server ($k_{SS/user}$, validity period, user ID, user address, etc). It is encrypted with $k_{SS}$ so that only the Service Server can decrypt it.
+	\end{enumerate}
+	
+	\item The client know has enough information to connect to the SS, with the two following messages:
+	\begin{enumerate}[label=\bfseries\Alph*), resume]
+		\item same as H.
+		\item New $Authenticator$ containing the client ID, a new timestamp, encrypted with $k_{SS/user}$.
+	\end{enumerate}
+	
+	\item When the Service Server receives both messages, it can decrypt the session key, and confirm its true identity with a last message
+	\begin{enumerate}[label=\bfseries\Alph*), resume]
+		\item The timestamp found in message H + 1, encrypted with the session key.
+	\end{enumerate}
+\end{enumerate}
+
+Kerberos is still the leader in the authentication frameworks world. However, it shows some weaknesses. M. Belovin \textit{et Al.} analyzed Kerberos v5\cite{Bellovin1990} and its inherent weaknesses. He found several potential weaknesses, like replay attacks (the protection against replays is based on timestamps, which are not very secure, as explained in section \ref{02_timestamp_vs_nonce}), spoofing login (the end workstation is corrupted and save login and credential on login), password guessing attack, or ticket scope (a KDC defines a Kerberos \textit{realm}, but several realms can be connected, and the KDC cooperate for authenticating users from remote realms. Every realm can have a trust policy about which other realms it can trust. But if a realm A trusts a realm B, which trusts a realm C, then A will trust C, even if the policy of A is against that).
+
+Even if some corrections have been implemented (nonces have been added as an extra security feature for example), the Kerberos protocol still remains under the threat of password guessing attack, for example. In 2009, \cite{kim2009survey} M. Kim explains that Kerberos v5 uses a pre-authentication scheme in order to prevent off-line password attack. But if an attacker can access enough of those pre-authentication messages, it could execute a dictionary attack. Indeed, the message sent by the server consists in a timestamp, encrypted with a key derived from the user's password, and the timestamp always have the same format YYYYMMDDHHMMSSZ.
+
+The paper also present another strong weakness to a man-in-the-middle attack, by setting up a fake KDC. Concerning this specific attack, B. Hill explained that even if the authentication protocol is seconded by strong authentication measures, like smart card reader authentication,  the attack can still be successfully executed to masquerade users\cite{Consultant}.
+
+\subsection{Federated Identity Management - with SSO} 
 \subsubsection{Shibboleth}
 \subsubsection{SAML}
-\subsection{Kerberos}
-\subsection{OpenID and OpenID Connect}
+
+\subsection{Trust based framework}
+In the previous described frameworks, each service had to be authenticated. In kerberos, each service has to be registered in a Kerberos server (more specifically the Ticket Granting Service server) in order for the authentication process to succeed. This doesn't get along with the actual world, where services are more and more distributed and it would lead in the end to a very complex system. 
+
+Subsequently, frameworks have been developed, where services are by definition trusted. It means, that every service can ask for a user authentication. This is explained in the following section for the OpenID frameworks.
+ 
+\subsubsection{OpenID and OpenID Connect}
 
 
 \section{Authorization}
