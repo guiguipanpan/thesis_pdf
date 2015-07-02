@@ -58,7 +58,10 @@
 \usepackage{xcolor}					% Colors
 \definecolor{LightBlue}{rgb}{0.55,0.55,1}
 \definecolor{DarkBlue}{rgb}{0.2,0.2,0.5}
+\definecolor{Maroon}{rgb}{0.6,0.15,0.2}
 \definecolor{DarkRed}{rgb}{0.71,0.12,0.07}
+\definecolor{DarkGreen}{rgb}{0.2,0.6,0.2}
+\definecolor{LightGray}{rgb}{0.8,0.8,0.8}
 
 % =========================================================================
 % = PAGE LAYOUT
@@ -66,6 +69,7 @@
 
 \usepackage{geometry}
 \geometry{inner=3cm, outer=2cm, bottom=4cm}
+%\geometry{inner=4cm, outer=2cm, top=2cm, bottom=2.5cm}
 
 \newcommand{\setwidesite}				% changes the geometry to have less margin
 {
@@ -79,6 +83,8 @@
 
 \setlength{\parindent}{4mm}
 \setlength{\parskip}{1.5mm }
+%\setlength{\parindent}{0mm}
+%\setlength{\parskip}{0.35cm }
 
 
 % =========================================================================
@@ -104,9 +110,11 @@
 % = FONTS
 % =========================================================================
 
+%\usepackage{lmodern}
 \usepackage{mathpazo} 
-\usepackage[scaled=.95]{helvet} 
+\usepackage[scaled=0.95]{helvet} 
 \usepackage{courier} 
+\renewcommand{\baselinestretch}{1.15} 
 
 
 % =========================================================================
@@ -242,25 +250,29 @@
      morestring=[b]',
      morestring=[b]"
   }
-\lstdefinelanguage{Java}{
-     keywords={},
+  \lstdefinelanguage{Java}{
+  	keywords={},
+  	keywordstyle=\color{bluegrey}\bfseries,
+  	morekeywords=[2]{public, class, extends, implements, empty, if, else, fail, function, functionend, if, implements, in, inherit, inout, not, of, operations, out, return, set, then, types, while, use},
+  	keywordstyle={[2]\color{violet}\bfseries},
+  	otherkeywords={@param, @returns, @return, @author, @type, @link, @see},
+  	sensitive=false,
+  	morecomment=[l][\color{lstgreen}]{//},
+  	morecomment=[s][\color{lstgreen}]{/*}{*/},
+  	morecomment=[s][\color{javadoc}]{/**}{*/},
+  	morestring=[b]',
+  	morestring=[b]"
+  }
+\lstdefinelanguage{HLPSL}{
+     keywords={public\_key, symmetric\_key, agent, message, nat, channel(dy)},
      keywordstyle=\color{bluegrey}\bfseries,
-     morekeywords=[2]{abstract,boolean,break,byte,case,catch,char,class,
-      const,continue,default,do,double,else,extends,false,final,
-      finally,float,for,goto,if,implements,import,instanceof,int,
-      interface,label,long,native,new,null,package,private,protected,
-      public,return,short,static,super,switch,synchronized,this,throw,
-      throws,transient,true,try,void,volatile,while},
+     morekeywords=[2]{local,init,transition,def,played\_by,role, end, role},
      keywordstyle={[2]\color{violet}\bfseries},
-     morekeywords=[3]{@SuppressWarnings, @Capability, @Override},
-     keywordstyle={[3]\color{lstgrey}},
-     otherkeywords={@param, @return, @returns, @author, @link, @see},
      sensitive,
-     morecomment=[l]//,
-     morecomment=[s]{/*}{*/},
-     morecomment=[s][\color{javadoc}]{/**}{*/},
-     morestring=[b]",
-     morestring=[b]',
+     morecomment=[l][\color{lstgrey}]\%,
+	% morecomment=[s]\%,
+    % morestring=[b]",
+     %morestring=[b]',
   }[keywords,comments,strings]
 
 % some listings styles from Gregor Aisch
@@ -271,6 +283,19 @@ sensitive=false, morecomment=[s]{<!--}{-->}, morestring=[b]", morestring=[d]'}
 
 \lstdefinelanguage{CSS} {morekeywords={azimuth,  background-attachment,  background-color,  background-image,  background-position,  background-repeat,  background,  border-collapse,  border-color,  border-spacing,  border-style,  border-top, border-right, border-bottom, border-left,  border-top-color, border-right-color, border-bottom-color, border-left-color,  border-top-style, border-right-style, border-bottom-style, border-left-style,  border-top-width, border-right-width, border-bottom-width, border-left-width,  border-width,  border,  bottom,  caption-side,  clear,  clip,  color,  content,  counter-increment,  counter-reset,  cue-after,  cue-before,  cue,  cursor,  direction,  display,  elevation,  empty-cells,  float,  font-family,  font-size,  font-style,  font-variant,  font-weight,  font,  height,  left,  letter-spacing,  line-height,  list-style-image,  list-style-position,  list-style-type,  list-style,  margin-right, margin-left,  margin-top, margin-bottom,  margin,  max-height,  max-width,  min-height,  min-width,  orphans,  outline-color,  outline-style,  outline-width,  outline,  overflow,  padding-top, padding-right, padding-bottom, padding-left,  padding,  page-break-after,  page-break-before,  page-break-inside,  pause-after,  pause-before,  pause,  pitch-range,  pitch,  play-during,  position,  quotes,  richness,  right,  speak-header,  speak-numeral,  speak-punctuation,  speak,  speech-rate,  stress,  table-layout,  text-align,  text-decoration,  text-indent,  text-transform,  top,  unicode-bidi,  vertical-align,  visibility,  voice-family,  volume,  white-space,  widows,  width,  word-spacing,  z-index},
 sensitive=false, morecomment=[s]{/*}{*/}, morestring=[b]", morestring=[d]'}
+
+\lstdefinelanguage{XML}
+{
+	basicstyle=\ttfamily,
+	morestring=[s]{"}{"},
+	morecomment=[s]{?}{?},
+	morecomment=[s]{!--}{--},
+	commentstyle=\color{DarkGreen},
+	moredelim=[s][\color{black}]{>}{<},
+	moredelim=[s][\color{red}]{\ }{=},
+	stringstyle=\color{blue},
+	identifierstyle=\color{Maroon}
+}
 
 \lstdefinelanguage{JavaFX} {morekeywords={abstract, after, and, as, assert, at, attribute, before, bind, bound, break, catch, class, continue, def, delete, else, exclusive, extends, false, finally, first, for, from, function, if, import, indexof, in, init, insert, instanceof, into, inverse, last, lazy, mixin, mod, new, not, null, on, or, override, package, postinit, private, protected, public-init, public, public-read, replace, return, reverse, sizeof, static, step, super, then, this, throw, trigger, true, try, tween, typeof, var, where, while, with },
 sensitive=false, morecomment=[l]{//}, morecomment=[s]{/*}{*/}, morestring=[b]", morestring=[d]'}
@@ -356,7 +381,7 @@ sensitive=false, morecomment=[s]{<!--}{-->}, morestring=[b]", morestring=[d]'}
 %\floatplacement
 
 \renewcommand{\floatpagefraction}{0.85}		% if a figure takes more than 85% of a page it will be typeset on a separate page
-\usepackage[it,bf,tight,hang,raggedright]{subfigure}
+\usepackage[lofdepth,lotdepth]{subfig}
 
 %\numberwithin{figure}{section}
 %\numberwithin{table}{section}
@@ -370,7 +395,7 @@ sensitive=false, morecomment=[s]{<!--}{-->}, morestring=[b]", morestring=[d]'}
 {
   \begin{minipage}
   {.2\textwidth}
-    \includegraphics[width=0.9\textwidth]{snet_footer.png}
+    \includegraphics[width=0.9\textwidth]{cit_footer.png}
   \end{minipage}
 }
 

@@ -1,4 +1,20 @@
 \chapter{Conclusion}
 \label{cha:conclusion}
 
-Describe what you did here
+This thesis presented and evaluated an authentication and authorization framework for  Pools of dynamically provisioned devices. This chapter concludes the thesis with a summary of the achieved work and proposes as well a few leads for possible future works.
+
+\section{Overview of the thesis}
+The main goal of this thesis was to design a secure global authentication and authorization framework for environment where devices are dynamically shared, like the so-called \emph{device cloud}. The design mainly focused on the security aspects, on one hand, and on the other hand on the specificity of such an environment (i.e. potentially scared resources platform, or the use of Java Serialization). 
+
+Several existing frameworks or protocols, on which the solution could have been based on, have been considered. The final call was to use, for a direct authentication, a SSL Certificate authentication with the possibility to add extra authentication methods (like password or One-Time-Password) and for performing authentication for a third-party, to extend the OpenID Connect specification.
+
+Concerning the authorization, a static process has been chosen: every entity is persisted with attributes like EntityOwner(which represents the owner of the entity) or EntityOperator, on which the authorization to create, read, update or remove the entity is based. A Consumer can for example define a group of allowed user for its own Consumer Profile.
+
+\section{Future research}
+
+\subsection{Integration}
+
+\subsection{Evaluation}
+
+\subsection{Accountability}
+

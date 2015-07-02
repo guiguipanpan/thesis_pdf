@@ -1,0 +1,165 @@
+\chapter{AVISPA Results}
+\label{appendix:AVISPA_results}
+
+\section{Direct Authentication}
+
+\subsection{OMFC method}
+\color{lstgrey}{\% OFMC}\\
+\color{lstgrey}{\% Version of 2006/02/13}\\
+\color{black}
+SUMMARY\\
+SAFE\\
+\linebreak
+DETAILS\\
+BOUNDED\_NUMBER\_OF\_SESSIONS\\
+\linebreak
+GOAL\\
+as\_specified\\
+\linebreak
+BACKEND\\
+OFMC\\
+\linebreak
+STATISTICS\\
+parseTime: 0.00s\\
+searchTime: 0.05s\\
+visitedNodes: 19 nodes\\
+depth: 7 plies\\
+
+\subsection{CL-AtSe}
+SUMMARY\\
+SAFE\\
+\linebreak
+DETAILS\\
+BOUNDED\_NUMBER\_OF\_SESSIONS\\
+TYPED\_MODEL\\
+BOUNDED\_SEARCH\_DEPTH \\
+\linebreak
+GOAL\\
+As Specified\\
+\linebreak
+BACKEND\\
+CL-AtSe\\
+\linebreak
+STATISTICS\\
+Analysed   : 10 states\\
+Reachable  : 7 states\\
+Translation: 0.03 seconds\\
+Computation: 0.00 seconds\\
+
+\subsection{SATMC}
+SUMMARY\\
+SAFE\\
+\linebreak
+DETAILS\\
+STRONGLY\_TYPED\_MODEL\\
+BOUNDED\_NUMBER\_OF\_SESSIONS\\
+BOUNDED\_SEARCH\_DEPTH\\
+BOUNDED\_MESSAGE\_DEPTH\\
+\linebreak
+GOAL\\
+\%\% see the HLPSL specification..\\
+\linebreak
+BACKEND\\
+SATMC\\
+\linebreak
+COMMENTS\\
+\linebreak
+STATISTICS
+\begin{nstabbing}
+	\hspace{15em}\=\hspace{10em}\=\kill
+	attackFound \> false \> boolean\\ 
+	upperBoundReached \> true \> boolean \\ 
+	graphLeveledOff \> 5 \> steps \\ 
+	satSolver \> zchaff \> solver \\ 
+	maxStepsNumber \> 11 \> steps\\ 
+	stepsNumber \> 6 \> steps \\ 
+	atomsNumber \> 0 \> atoms \\ 
+	clausesNumber \> 0 \> clauses\\ 
+	encodingTime \> 0.16 \> seconds \\ 
+	solvingTime \> 0.00 \> seconds\\ 
+	if2sateCompilationTime \> 0.28 \> seconds\\
+\end{nstabbing} 
+
+ATTACK TRACE\\
+\%\% no attacks have been found..
+
+\section{delegated Authentication}
+
+\subsection{OMFC method}
+\color{lstgrey}{\% OFMC}\\
+\color{lstgrey}{\% Version of 2006/02/13}\\
+\color{black}
+SUMMARY\\
+SAFE\\
+\linebreak
+DETAILS\\
+BOUNDED\_NUMBER\_OF\_SESSIONS\\
+\linebreak
+GOAL\\
+as\_specified\\
+\linebreak
+BACKEND
+OFMC\\
+\linebreak
+STATISTICS\\
+parseTime: 0.00s\\
+searchTime: 0.51s\\
+visitedNodes: 114 nodes\\
+depth: 13 plies
+
+\subsection{CL-AtSe}
+SUMMARY\\
+SAFE\\
+\linebreak
+DETAILS\\
+BOUNDED\_NUMBER\_OF\_SESSIONS\\
+TYPED\_MODEL\\
+\linebreak
+GOAL\\
+As Specified\\
+\linebreak
+BACKEND\\
+CL-AtSe\\
+\linebreak
+STATISTICS\\
+Analysed   : 1173 states\\
+Reachable  : 234 states\\
+Translation: 0.08 seconds\\
+Computation: 0.04 seconds
+
+\subsection{SATMC}
+SUMMARY\\
+SAFE\\
+\linebreak
+DETAILS\\
+STRONGLY\_TYPED\_MODEL\\
+BOUNDED\_NUMBER\_OF\_SESSIONS\\
+BOUNDED\_SEARCH\_DEPTH\\
+BOUNDED\_MESSAGE\_DEPTH\\
+\linebreak
+GOAL\\
+\%\% see the HLPSL specification..\\
+\linebreak
+BACKEND\\
+SATMC\\
+\linebreak
+COMMENTS\\
+\linebreak
+STATISTICS
+\begin{nstabbing}
+	\hspace{15em}\=\hspace{10em}\=\kill
+	attackFound \> false \> boolean\\ 
+	upperBoundReached \> true \> boolean \\ 
+	graphLeveledOff \> 11 \> steps \\ 
+	satSolver \> zchaff \> solver \\ 
+	maxStepsNumber \> 13 \> steps\\ 
+	stepsNumber \> 12 \> steps \\ 
+	atomsNumber \> 1152 \> atoms \\ 
+	clausesNumber \> 3806 \> clauses\\ 
+	encodingTime \> 0.87 \> seconds \\ 
+	solvingTime \> 0.004 \> seconds\\ 
+	if2sateCompilationTime \> 0.59 \> seconds\\
+\end{nstabbing} 
+
+ATTACK TRACE\\
+\%\% no attacks have been found..

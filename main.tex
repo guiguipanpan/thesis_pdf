@@ -21,10 +21,28 @@ ASCII
 TCP
 device
 devices
+Operator
+Vendor
+Consumer
+Aggregator
+Operators
+Vendors
+Consumers
+Aggregators
+principal
+principals
 }
 
 %make readable references
 \usepackage[pdftex,pdfpagelabels=true]{hyperref}
+\usepackage{color, colortbl}
+\usepackage{pbox}
+\definecolor{Gray}{gray}{0.4}
+\usepackage{longtable}
+\usepackage{scrextend}
+%\usepackage{subfigure}
+\usepackage{caption}
+
 \hypersetup{%
 	pdftitle={Thesis Title},
 	pdfauthor={Thesis Author},
@@ -41,13 +59,12 @@ devices
 
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
 
-\usepackage{color, colortbl}
-\usepackage{pbox}
-\definecolor{Gray}{gray}{0.4}
-\usepackage{longtable}
-\usepackage{scrextend}
 
-
+\newenvironment{nstabbing}
+{\setlength{\topsep}{-\parskip}%
+	\setlength{\partopsep}{0pt}%
+	\tabbing}
+{\endtabbing}
 
 \begin{document}
 
@@ -66,7 +83,7 @@ devices
 \begin{titlepage}
 	\AddToShipoutPicture*{
 		\put(0,0){
-			\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio=false]{images/titlepage.pdf}
+			\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio=false]{images/titlepage_2.pdf}
 		}
 	}
 	\strut
@@ -84,7 +101,7 @@ devices
 		\textbf{Guillaume Pansier}\\
 		\vspace{0.8cm} 
 		\textbf{Matriculation Number 356959}\\
-		\vspace{2cm} 
+		\vspace{1.8cm} 
 	 	A thesis submitted to\\
 		\vspace{0.5cm}
 		Technische Universität Berlin\\
@@ -93,13 +110,13 @@ devices
 		Complex and Distributed IT Systems\\
 		\vspace{0.5cm}
 		Master Thesis\\
-		\vspace{2.2cm}
-		\today\\
 		\vspace{2.0cm}
+		\today\\
+		\vspace{1.8cm}
 		\large
 		Supervised by:\\
 		Prof. Dr. Odej Kao\\
-		\vspace{1cm}
+		\vspace{0.8cm}
 		Assistant supervisor:\\
 		Dr. Andreas Kliem
 		\end{center}
@@ -140,10 +157,10 @@ Berlin, \today \hspace{15 mm} Chuck Norris' son
 %\part{}						% optional: use parts to structure your thesis
 \input{01_introduction}
 \input{02_related_work}
-%\input{03_concept_and_design}
-%\input{04_implementation}
-%\input{05_evaluation}
-%\input{06_conclusion}
+\input{03_concept_and_design}
+\input{05_evaluation}
+\input{04_implementation}
+\input{06_conclusion}
 
 %--------------------------------------------------------------
 \backmatter
@@ -164,6 +181,8 @@ Berlin, \today \hspace{15 mm} Chuck Norris' son
 
 \input{a01_listings}
 \input{a1_Kerberos}
+\input{a2_HLPSL}
+\input{a3_AVISPA}
 
 \end{appendices}
 
