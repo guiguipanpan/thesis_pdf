@@ -4,7 +4,7 @@
 
 In this section, the global system known as \emph{device cloud} will be first detailed. Afterwards, the reader will be introduced to the different possible protocols and technologies that could be used and an overview of the different researches and studies that have been previously performed will be given.
  
-\section{The Devices Cloud}
+\section{The Device Cloud}
 A more complete view of the global system is rendered in \ref{fig:design_complete}. Of course, only the information relevant for this thesis is depicted.
 
 %Integrating the requirements defined in the Introduction to a more detailed view of the global system, the architecture the Figure \ref{fig:design_complete} of the \emph{device cloud} architecture can be rendered. Of course, only the information relevant for this thesis is depicted.
@@ -12,19 +12,19 @@ A more complete view of the global system is rendered in \ref{fig:design_complet
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=1\textwidth]{images/design_complete}
-	\caption{Detailed Architecture of the Devices Cloud}
+	\caption{Detailed Architecture of the Device Cloud}
 	\label{fig:design_complete}
 \end{figure}
 
-Every Domain Operator maintain a User Directory and a Device Directory. The earlier is used to authenticate and authorize every entities that can be. The latter is used to store the information about every device operated by the operator.
+Each Domain Operator maintains a User Directory and a Device Directory. The earlier is used to handle every user registered in the Domain Operator (authentication is performed here, for example). The latter is used to store the information about every device operated by the operator.
 
-The Device Directory is particularly important for authorization purposes, because it stores knowledge like the Device Owner and Device Operator for every device. As explained in the Introduction, those two roles are the only ones that are authorized, for example, to revoke a device's access. 
+Both Directories are important for authorization. The Device Directory stores indeed knowledge like the Device Owner and Device Operator for every device. As explained in the Introduction, those two roles are the only ones that are authorized, for example, to revoke a device's access. The User Directory, in the other hand, is naturally used for authorization of users since it stores information about users. 
 
-In the framework, the Device Directory could then be compared to an authorization server in the sense that it can map an entity with roles.
+In the framework, the Device Directory could then be compared to an authorization server in the sense that it can map an entity with roles. The User Directory maps an entity with a digital identity: type of the entity (Consumer, Aggregator, Vendor, Operator), login, preferences, etc.
 
-This Device Directory has a public interface, the Device Pool, containing the devices they operate. This Device Pool contains only the information that an end customer can see in order to choose which devices he wants to have access to. The different device pools contribute then to a Federated Device Pool, containing all devices available to the customers. Those, when registered to their Domain Operator, can have access to this Federated Pool. Of course, the different pools of devices must be synchronized, but it will not be explained in this thesis.
+The Device Directories have a public interface, the Device Pool, containing the devices they operate. This Device Pool contains only the information that a Consumer can see in order to choose which devices he wants to have access to. The different device pools contribute then to a Federated Device Pool, containing all devices available to the Consumers. Those, when registered to their Domain Operator, can have access to this Federated Pool. Of course, the different pools of devices must be synchronized, but it will not be explained in this thesis.
 
-When a customer has chosen which devices he wants to read the data from, he uses an aggregator, most likely its mobile phone, to integrate the different devices. The authentication of the different actors is first performed (intra Operators, between Customer and Domain Operator, between the Aggregator and the Domain Operator, etc), the required data (like drivers) is then retrieved from the Domain Operators or Root Domain Operator and the data can eventually be read from the device.
+When a Consumer has chosen which devices he wants to read the data from, he uses an Aggregator, most likely its mobile phone, to integrate the different devices. The authentication of the different actors is first performed (intra Operators, between Consumer and Domain Operator, between the Aggregator and the Domain Operator, etc), the required data (like drivers) is then retrieved from the Domain Operators or Root Domain Operator and the data can eventually be read from the device.
 
  \subsection{Entities}
  \label{sec:02_entities}
@@ -159,10 +159,10 @@ The hospital B is quite familiar with those technologies, but it wishes that the
 \linebreak
 The reader should now have a good knowledge of the global design and its requirements. The next section introduces him to the authentication and authorization principles and implementations.
 
-\section{Encryption}
+\section{Confidentiality}
 Encryption is one of the key principle of network security. It ensures that nobody can have access to protected information even if a message has been intercepted, by encoding the messages. Different algorithms and methods exist, so that only the recipient of a message can decrypt the encoded message.
 
-\subsection{symmetric key}
+\subsection{Symmetric Cryptography}
 \label{sec:02_symmetric_keys}
 Some algorithm or protocols are based on a symmetric key. It is assumed that both the sender and the recipient of the messages share a secret (the key). Only the two actors A and B can then encrypt and decrypt the messages thanks to this shared secret key.
 
@@ -170,7 +170,7 @@ Of course, it is assumed that the underlying cryptosystem is strong, so that nob
 
 This system requires also that the two communicating entities share the secret key from the beginning, which poses the problem of the key distribution. This can be done through physical delivery (A delivers the key to B, or a third party delivers a key to A and B), by using a previous shared key (the new key is sent encrypted with the old key), or by using an encrypted communication with a third party C.
  
-\subsection{asymmetric keys}
+\subsection{Asymmetric Cryptography}
 Other algorithms are based on asymmetric keys. This time, every entity has two keys: a public one $k_{p}$, that can be sent to anybody, and a private $ k_{p}^{-1} $, that is kept secret.
 
 The idea underneath this system is that a message encrypted with $k_{p}$ can only be decrypted with $ k_{p}^{-1} $, and, the other way around, a message encrypted with $ k_{p}^{-1} $ can only be decrypted with $k_{p}$.
@@ -191,14 +191,16 @@ The symmetric key encryption is simpler and quicker than the asymmetric one, but
 	\item After a few steps that both the client and the server perform, a masterkey is derived from the pre-masterkey, which will be used for encrypting and verifying the authenticity of the messages.
 \end{enumerate}
 
-It is here presupposed that a certificate authority exists. This can be a dedicated one (in this case, a standard browser would notify that the certificate is not secure) or a recognized one. In the latter case, every server has to buy a certificate from a known authority. The creation, verification and revocation of certificates requires a Public Key Infrastructure (PKI) to be established.
+It is here presupposed that a certificate authority (CA) exists. This can be a dedicated one (creating its own CA is not complicated but making it worldwide recognized as a valid one is. In this case, a standard browser would notify that the certificate is not secure) or a standard recognized one. In the first case, the creation, verification or revocation of certificates requires a Public Key Infrastructure (PKI) to be established. In the latter case, every server has to buy a certificate from a known authority. Those certificates are then handled during their life-cycle by standard authorities and services.
 
-By default, only the server sends a certificate in order for the client to be sure of its entity. However, client authentication can also be done when required, by sending during the handshake the client certificate, signed with the CA private key .
+
+By default, only the server sends a certificate for the client to be sure of its identity. However, client authentication can also be done when required, by sending during the handshake the client certificate, signed with the CA private key. In this case, the client also has a private/public key pair.
  
 SSL is also a protocol that lies between the transport layer (like TCP) and the application layer of the OSI model. It means, the process is completely transparent to the user and is done automatically. The most basic example is the online billing. When a user pays in Amazon, for example, he doesn't notice that it is using SSL, it is done automatically by the browser.
 
-It is therefore not unusual that an authorization and authentication process is implemented on top of a SSL secured connection.
+It is therefore quite common for an authorization and authentication process to be implemented on top of a SSL secured connection.
 
+Although SSL is considered to be secure, a known man-in-the middle attack can be performed. This attack takes advantage from the fact that often, a SSL-encrypted connexion is a follow-up of an insecure connexion: the user gets redirected from http to https when more security is needed (a login form, for example). During the redirection from the insecure endpoint (http) to the secure one (https), a man-in-the-middle can simply rewrite the redirect address to one of its own insecure endpoints and process to the SSL handshake as if it were the user. There are several ways to detect or prevent the attack. The first is for the client to check that it is communicating over a secure channel ("https" written in the browser address bar, for example). The second one would be for the server to require a secure connexion from the beginning (any attempt to connect to an http endpoint would fail). Ultimately, SSL client authentication, as above-explained, can be set up. The man in the middle attack would then also need to know the private key of the user, which is theoretically impossible.
 
 \section{Authentication}
 \label{02_authentication}
@@ -254,9 +256,9 @@ The use of nonce or timestamps can then be used for protecting against those rep
 	\>    \>  : \> if equal then accept, else reject \\
 \end{tabbing} 
 
-If an entity now replay the message $\lbrace P, Q, n \rbrace_{k}$, the nonce will not be valid anymore and thus successful replay attacks can be avoided.
+If an entity now replays the message $\lbrace P, Q, n \rbrace_{k}$, the nonce will not be valid anymore and thus successful replay attacks can be avoided.
 
-In regards to the choice between timestamps and nonce, it should be understood that the use of timestamps requires every entities clock to be synchronized, which might be difficult when the number of clocks gets high. Besides, if the replay attacks is executed fast enough, the timestamps could still be valid. Therefore, nonce are in general to be preferred.
+In regards to the choice between timestamps and nonce, it should be understood that the use of timestamps requires every entities clock to be synchronized, which might be difficult when the number of clocks gets high. Besides, if the replay attacks is executed fast enough, the timestamps could still be valid. Therefore, nonces are in general to be preferred.
 \label{02_timestamp_vs_nonce}
 
 When using such a symmetric cryptosystem, it is supposed that there exists one key per pair of entities. In a network of N entities, this would rise up to $\frac{N.(N-1)}{2}$ keys. In addition, every entity would have to maintain N keys. The scalability of the process is therefore not optimal. 
@@ -347,16 +349,16 @@ In this protocol, the two parties share a secret with a centralized server A. Co
 
 The use of such functions doesn't reduce capabilities of authentication systems, and can facilitate computation. They could also be use in a more elaborated authentication scheme, like a Kerberos-like system (see section \ref{sec:02_Kerberos}).
 
-\subsection{Password authenticated key exchange - PAKE}
-The password authenticated key exchange is an interactive method for two parties to create a session key based only on the knowledge of a password. This method doesn't require any PKI (it doesn't use SSL, for example) but ensure a secure communication.
+\subsection{Password authenticated key exchange}
+The password authenticated key exchange (PAKE) is an interactive method for two parties to create a session key based only on the knowledge of a password. This method doesn't require any PKI (it doesn't use SSL, for example) but ensure a secure communication.
 
-Unlike SSL based authentication, it is also not subject to man-in-the-middle attack. For example, if a user gets redirected from an unsecure endpoint (http) to a secure one (https), a man-in-the-middle can simply rewrite the redirect address to one of its own unsecure endpoint and process to the SSL handshake as if it were the user. The only way to detect the attack is if the client checks that it is communicating over a secure channel (https written in the browser, for example). If the client discloses that way its password on a phishing website, the password will be stolen. In PAKE, the password is never revealed, only proofs of its knowledge are sent through the network.
+Unlike SSL based authentication, it is also not subject to man-in-the-middle attack. Indeed, if the client discloses its password on a phishing website as explained previously, the password will be stolen. With PAKE, the password is never revealed, only proofs of its knowledge are sent through the network.
 
 The first milestone occurred in 1992 when Bellovin and Merrit designed the EKE protocol\cite{Bellovin1992}. This protocols has been proven to have several weaknesses, but it showed at least that the idea underneath PAKE could be implemented. Many algorithm have been afterwards proposed, of which several were variants of the EKE protocol. In 2008, stating that the few methods that were said to be resilient to known attacks were patented (EKE\cite{bellovin1993cryptographic} and SPEKE\cite{jablon2001cryptographic}), F. Hao and Peter Ryan proposed J-PAKE (Juggling) which is proven to be secure\cite{hao2010j}\cite{Hao2011}. Nevertheless, It is restricted to only two communication parties, whereas other protocols allow for a trusted third party to mediate between the two communicating parties for mutual authentication\cite{gong1993protecting}\cite{gong1995optimal}.
 
-Even authentication between realms could be performed with PAKE \cite{byun2002password}. In a distributed environment like the \emph{device cloud}, where service providers authenticate their user and cooperate for remote user authentication, this is a possibility. However, several flaws have been discovered \cite{Wang2004}.
+Even authentication between realms could be performed with PAKE \cite{byun2002password}. In a distributed environment like the \emph{device cloud}, where service providers authenticate their user and cooperate for remote user authentication, this could be a possibility. However, flaws like dictionary attacks have been discovered \cite{Wang2004} in this protocol.
 
-The main drawback that a PAKE system could have is that it requires that every pair of entities share a secret (like a password) from the beginning. This hypothesis can in practice become a unpractical, as the number of network nodes gets high and if the nodes can be dynamically integrated into the network.
+The main drawback that a PAKE system could have is that it requires that every pair of entities share a secret (like a password) from the beginning. This hypothesis can in practice become unpractical, as the number of network nodes gets high and if the nodes can be dynamically integrated into the network.
 
 
 \subsection{Shared Authentication Framework}
@@ -452,13 +454,17 @@ SAML (Security Assertion Markup Language)\cite{hughes2005security} is a XML-base
 
 Again, the principal (typically a user), the Identity Provider and the Service Provider roles are defined. As the name suggests, entities can assert identity (also entitlement and attributes) properties about principals. Those assertions are coded with the XML format.
 
-SAML has been very popular and used in many SSO/FIM system (Shibboleth \ref{02_shibboleth}, for example). Nevertheless, SAML is now known to present weaknesses and security flaws. No later than 2008, Alessandro Armando \textit{et. Al} could break the Google SSO system used for google Apps\cite{Armando2008}. More recently, in 2012, Somorovsky et. Al proved that 11 of the 14 major SAML based frameworks (among them Shibboleth) present XML Signature Wrapping (XSW) weaknesses\cite{somorovsky2012breaking}. Finally, in 2013, another security flaw was found in any SAML based security system\cite{armando2013authentication}. OpenID (see section \ref{02_OpenID}) was also found to be vulnerable to the same attack.
+SAML has been very popular and used in many SSO/FIM system (Shibboleth \ref{02_shibboleth}, for example). Nevertheless, SAML is also known to present (or have presented) several weaknesses and security flaws. No later than 2008, Alessandro Armando \textit{et. Al} could break the Google SSO system used for Google Apps\cite{Armando2008}. More recently, in 2012, Somorovsky et. Al proved that 11 of the 14 major SAML based frameworks (among them Shibboleth) present XML Signature Wrapping (XSW) weaknesses\cite{somorovsky2012breaking}. Finally, in 2013, another security flaw was found in any SAML based security system\cite{armando2013authentication}. OpenID (see section \ref{02_OpenID}) was also found to be vulnerable to the same attack.
 
 
 
 
 \subsubsection{Trust based framework}
-In the previous described frameworks, each service and user had to be authenticated. In Kerberos, each service has to be registered in a Kerberos server (more specifically the Ticket Granting Service server) in order for the authentication process to succeed. This enables to have a full control of the allowed services, but this doesn't always get along with the actual world, where services are more and more distributed and where they also all have their own specification. In the end a Kerberos-like system could lead to a very complex system. 
+In any distributed network, trust is a precondition for a successful functioning. The ideal case would be an unlimited trust to every other node of the network, but this is rarely the case. For each participant, there must be then at least one other participant that is trusted, used to verify the information received from the network.
+
+Sometimes, a central component takes the role of the trusted entity. The Certificate Authority CA of a PKI for example, must be trusted for the SSL process to function, whereas in Kerberos, this would be the Ticket Granting Service TGS and the Authentication Server AS.
+
+In the previous described frameworks, both services and users had indeed to be authenticated. In Kerberos, each service has to be registered in a Kerberos server (the TGS) in order for the authentication process to succeed. This enables to have a full control of the allowed services, but this doesn't always get along with the actual world, where services are more and more distributed and where they also all have their own specification. In the end a Kerberos-like system could lead to a very complex system. 
 
 Subsequently, frameworks have been developed, where services are by default trusted. That means, service provider authentication is not performed. A certain form of control can be implemented, but it won't be authentication. Basically, every service can then ask for a user authentication. This is explained in the following section for the OpenID frameworks. \\
  
@@ -466,7 +472,7 @@ Subsequently, frameworks have been developed, where services are by default trus
 \label{02_OpenID}
 The OpenID et OpenID 2.0 Connect concepts are very similar. Hence, only OpenID 2.0 Connect will be here detailed.
 
-OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 (see section \ref{02_OAuth}) protocol. It enables Clients to verify the identity of the End-User based on the authentication performed by an Authorization Server, as well as to obtain basic profile information about the End-User in an interoperable and REST-like manner\cite{sakimura2014openid} (communication of information about the End-User is based on the use of Claims).
+OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 (see section \ref{02_OAuth}) protocol. It enables Clients to verify the identity of the End-User based on the authentication performed by an Authorization Server, as well as to obtain basic profile information about the End-User in an interoperable and REST-like manner\cite{sakimura2014openid}.
 
 In the OpenID flow, 3 entities intervene: 
 \begin{itemize}
@@ -487,9 +493,9 @@ The OpenID Connect authentication process is depicted in \ref{fig:OPIDCFlow}.
 
 The idea is the following: when a user wants to connect to a service RP, instead of creating an account, he can connect to a known and trusted Identity Provider OP (Google, Facebook, etc). 
 
-(1)The RP can for that prepare an adequate authentication request and redirect the user to its identity provider with this authentication request (the user is first prompted to enter its OpenID, from which the RP identifies the OP, and then redirected). 
-\\It must be here understood that the user is used as a way of conveying a message. End-User redirections are in general to be preferred to direct communication (between RP and IdP) because both the OP and RP must interact with the End-User (see step 2), which is made easier when the requests come from the End-User.
-\\(2) The user authenticates to its OP and allows the OP to deliver some details about him (email, etc).
+(1)The RP can for that prepare an adequate authentication request and redirect the user to its identity provider with this authentication request (the user is first prompted to enter its OpenID, from which the RP identifies the OP, and then is redirected). 
+\\It must be here understood that the user is utilized as a way of conveying a message. End-User redirections are in general to be preferred to direct communication (between RP and IdP) because both the OP and RP must interact with the End-User (see step 2), which is made easier when the requests come from the End-User.
+\\(2) The user authenticates to its OP and allows the OP to deliver some details about him (email, etc) to the RP.
 \\(3) An ID Token and (most of the time) Access Token are returned to the RP. Again, redirection of the user can be used. The ID Token is a security token that contains Claims about the authentication of the End-user. Typically, if the user is authenticated, when the authentication expires, etc. Once the RP gets this token, it can already open a session for the end-user since it is a proof of the validity of the End-User.
 \\(4) Ultimately, the RP can also asks the OP directly for other pieces of information about the user (mail, etc) that it didn't have in the ID Token. For that, it will use its Access Token (security token for user information).
 \\(5) User information is returned.
@@ -509,19 +515,12 @@ Yu-Lin Jeng proposed for example an OpenID based framework for distributed authe
 
 E. Ghazizadeh et. al, have compared many OpenID based protocol and presented their own, resilient to Insider Attack, MITM, Phishing Attacks and DNS Poisoning at te same time, on the contrary to the other protocol \cite{Ghazizadeh}. Their solution included an OpenID layer on top of One Time Password OTP, Trusted Platform Module (TPM) hardware and the use of  SAML Token.
 
-A major flow has been discovered in 2014 using the fact that the RPs identity is not controlled. As explained above, the OpenID flow is working with redirection of the End-User. One essential parameter is the so-called \textit{redirectURI}, specified by the RP at the beginning of the process (step 1) and with which the OP knows where to redirect the End-User (step 3). This parameter could theoretically be changed by any malicious agent, and the OP would then redirect the End-User to a malicious site with the ID and Access Token. Therefore, the RPs must register the full-path \textit{redirectURIs} at the OP beforehand, and the OP must verify this redirectURI. This, without beeing as restricting as a Kerberos system, limits the capabilities of an OpenID based system.
-
-\subsubsection{Trust}
-In any distributed network, trust is a precondition for a successful functioning. The ideal case would be an unlimited trust to every other node of the network, but this is rarely the case. For each participant, there must be then at least one other participant that is trusted, used to verify the information received from the network.
-
-It is the same thing for a shared authentication framework. At some point, a trusted authority must be able to assess the identity of a principal and must be trusted by the others.
-Sometimes, a central component takes the role of the trusted entity. The Certificate Authority CA of a PKI for example, must be trusted for the SSL process to function, whereas in Kerberos, this would be the Ticket Granting Service TGS and the Authentication Server AS.
-Sometimes, it is rather a group of entities that take this role. In an OpenID system for instance, this would be the different IdPs. 
-
-In the \emph{device cloud}, the different entities cannot trust each other from the beginning, since that would leads to a shared secret between each pair of entities. The Root Domain, in the other end, must be trusted by every other entity that communicates with him. Further on, it will be then supposed that every Domain knows how to contact the Root Domain, that it trusts the information coming from the Root Domain, and that the Root Domain will host every service that must be globally trusted. The other trust relationships between entities will all derive from this initial trust precondition.
+Another major flow has been discovered in 2014 which uses the fact that the RPs identity is not controlled. As explained above, the OpenID flow is working with redirection of the End-User. One essential parameter is the so-called \textit{redirectURI}, specified by the RP at the beginning of the process (step 1) and with which the OP knows where to redirect the End-User (step 3). This parameter could theoretically be changed by any malicious agent, and the OP would then redirect the End-User to a malicious site with the ID and Access Token. Therefore, the RPs must register their full-path \textit{redirectURIs} at the OP beforehand, and the OP must verify this redirectURI. This, without beeing as restricting as a Kerberos system, limits the capabilities of an OpenID based system.
 
 \subsection{Other Approaches}
-A lot of research has been done in the authentication field. This has led to numerous protocols, that we cannot detail here. However,  A. Liebl tried in 1994 to list the possible authentication protocols, his list is given in \hyperref[appendix:protocol_list]{appendix 1}. 
+A lot of research has been done in the authentication field. This has led to numerous protocols, that we cannot detail here. However,  A. Liebl tried in 1994 to list and evaluate the possible authentication protocols, his list is given in \hyperref[appendix:protocol_list]{appendix 1}. 
+
+From this list, only a few (presented here) which have neither bugs nor redundancies, will be considered.
 
 \section{Authorization}
 \label{02_authorization}
@@ -532,7 +531,7 @@ Together with authentication and identification (who is exactly an authenticated
 Often, the access controls models use the notion of \textit{owner} to control access to a resource, but other notions like roles, responsibilities or rules can be used.
  
 
-\subsection{In a ditributed environement - OAuth 2.0}
+\subsection{OAuth 2.0}
 \label{02_OAuth}
 
 In a distributed environment, authorization might refer to some other notions. The most other common case is for example when an entity wants to be authorized to access a resource on behalf of another entity.
@@ -570,19 +569,3 @@ The principle of OAuth 2.0 is the following: the client first requests the Resou
 As said above, the OAuth 2.0 protocol has been used and extended in many ways. OpenID Connect is based on it, as well as the previous versions of the Google Login and Facebook Login offers. However, several weaknesses have been found.
 
 In 2012, S. Sun analyzed in detail the OAuth 2.0 framework, and exposed several of those weaknesses\cite{Sun2012}, like access token disclosure through network eavesdropping or cross-site scripting (XSS), impersonation of users, or Cross-site Request Forgery (CSRF). Most of the time, those weaknesses come from lacks in the security measures that implement the RPs. Indeed, like OpenID Connect, the framework is based on trust, which means among others that the IdPs must trust the RPs in regards to security implementation. And exactly as OpenID Connect, many choices are left to the ones impelmenting the RPs, which can lead to several weaknesses.
-
-
-\section{Security Framework Validation}
-In order to verify that a framework responds to every security requirements, a certain methodology should be used. The following sections gives a few examples of such methodologies.
-
-\subsection{Using states machines}
-Meadows \cite{TODO} has developed a protocol verification and specification system based on communication between asynchronous states machine. 
-
-An insecure state is first specified. Then, it mus be proved that this state is unreachable, i.e. there are no sequences of state transition by which an initial state can lead to the insecure state).
-
-This system has been quite successful because several security flaws have been discovered with its application.
-
-\subsection{Using Logic}
-
-
-\subsection{BAN Logic}

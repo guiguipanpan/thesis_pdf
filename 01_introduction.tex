@@ -46,7 +46,7 @@ The Operators, providing access to the devices (as service providers), also act 
 Of course, the \emph{device cloud} must implement an authentication and an authorization layer to grant the right entity with the corresponding rights. As aforementioned, the access to a device is an example of a right that must be granted. This thesis will have for goal to design a robust authentication system responding to the device cloud needs and fitting the roles and entities defined in such a cloud. 
 
 
-\section{The problem}
+\section{Problem Definition}
 The complexity of the authorization and authentication system is at least threefold: it lies in the variety of actors and entities, in the variety of existing solutions and protocols, and in the restrictions inherent to the devices.
 
 \subsection{Various actors} 
@@ -69,19 +69,21 @@ For better understanding of which entity must be handled, a simplified structure
 
 In this architecture, the Domain Operators take the role of Device Operator and act as service providers. The devices they operate are used within aggregators, a virtual layer (software entity) that integrates devices and which is generally situated where the devices are. Typically, a consumer's mobile phone plays the role of the Aggregator and allows the consumer to handle every device and the read the data from them. It contains thus among other the required middleware for loading the drivers and software that a device needs, and for establishing a reliable communication channel between the devices and the other actors. Since aggregators communicate with other entities, it has to be authenticated.
 
-	Besides, the process of provisioning a device involves several steps and management services like accounting or decision making. In order to hide this complexity from the end users (i.e. Consumers), an Operator, called Consumer Operator, has been introduced. A Domain Operator can have several Consumer Operators, each handling different customers and devices. When a customer wants access to a device, it requests its Consumer Operator first.
+	Besides, the process of provisioning a device involves several steps and management services like accounting or decision making. In order to hide this complexity from the end users (i.e. Consumers), an Operator, called Consumer Operator, has been introduced. A Domain Operator can have several Consumer Operators, each handling different Consumers and devices. When a Consumer wants access to a device, it requests its Consumer Operator first.
 	
-	The Domain Operator provides the infrastructural and organizational capabilities (like Customer registration) whereas the Consumer Operator provides the end services to the consumers like selling their Customers access to devices. The Customer, requiring access to a protected resource, needs to be authenticated. 
+	The Domain Operator provides the infrastructural and organizational capabilities (like Consumer registration) whereas the Consumer Operator provides the end services to the Consumers like selling them access to devices. The Consumer, requiring access to a protected resource, needs to be authenticated. 
 
-It can happen that the required device is not operated within the Domain of the Consumer Operator. In this case, the Consumer Operator must first request which other Operator owns the device. Once it will have retrieved this information, if the two Consumer Operators are bound by a contract, the device's access can be provided. Of course, the requesting Customer operator must be authenticated within the Domain of the other one.
+It can happen that the required device is not operated within the Domain of the Consumer Operator. In this case, the Consumer Operator must first request which other Operator owns the device. Once it retrieves this information, if the two Consumer Operators are bound by a contract, the device's access can be provided. Of course, the requesting Consumer Operator must be authenticated within the Domain of the other one.
 
-In the previous scenario, the Consumer Operator needs to know which other Consumer Operator handles a specific device. For this request to succeed, global knowledge has to be stored. Which device is operated by which operator for example. In the same way, it is assumed that the Operators are provided with all the knowledge which is required for operating a device. But when integrating a new unknown device, this knowledge must be first retrieved. \\Therefore, in the already defined system, two other entities have been introduced: the so-called Root Domain Operator is placed on top of the Domain Operators and stores global knowledge about devices and existing Operators; the Vendor Entity represents vendors (of devices), which are part of the global process and furnish knowledge about the different devices. Since the Vendors communicate with the Root Domain Operator about protected and required knowledge, it must also be authenticated within the Root Domain Operator. 
+In this scenario, the Consumer Operator needs to know which other Consumer Operator handles a specific device. For this request to succeed, global knowledge has to be stored. Which device is operated by which operator for example. In the same way, it is assumed that the Operators are provided with all the knowledge which is required for operating a device. But when integrating a new unknown device, this knowledge must be first retrieved. \\Therefore, in the already defined system, two other entities have been introduced: the so-called Root Domain Operator is placed on top of the Domain Operators and stores global knowledge about devices and existing Operators; the Vendor Entity represents vendors (of devices), which are part of the global process and furnish knowledge about the different devices. Since the Vendors communicate with the Root Domain Operator about protected and required knowledge, it must also be authenticated within the Root Domain Operator. 
 
-When the Consumer Operator requests which other Consumer Operator operates a specific device, it then request the Root Domain. The requesting Consumer Operator acts for the Root Domain Operator as a client requesting access to a protected resource, and must then be authenticated by the Root Domain Operator.
+When the Consumer Operator retrieves which other Consumer Operator operates a specific device, it then request the Root Domain. The requesting Consumer Operator acts for the Root Domain Operator as a client requesting access to a protected resource, and must then be authenticated by the Root Domain Operator.
 
-In the end, four entities must be authenticated: the Consumers, the Aggregators and the Consumer Operators must be authenticated within Domain Operators, the Vendors and the Consumer Operators within the Root Domain Operator.
+In the end, four entities must be authenticated: the Consumers, the Aggregators, the Operators (Consumer and Domain) and the Vendors. The entities performing authentication are the Domain Operators (Root and non-Root).
 
-The different processes among the \emph{device cloud} involve also roles and authorization. An example for that is access revocation, which could be needed in the following E-Health application case: an emergency occurs requiring customer A to have control over device D, but customer B is using the device D at that time. The access must then be revoked before the device is re-attributed to customer A. In this case, only the Device Owner or Device Operator can take such a decision. Roles and authorization must therefore be handled.
+But since several Domain Operators exist at the same time, it is legitimate to specify where should which entity's record be kept. A Consumer or an Aggregator is supposed to communicate only within its Domain. A Domain Operator stores therefore information about its own consumers and aggregators. In the same way, Vendors information are only stored in the Root Domain. The Operators (Consumer and Domain) are susceptible to communicate with any other Operator. But the only Entity that knows every other Operator is the Root Domain. The Operators records are thus stored within the Root Domain, which can then share its knowledge.
+
+The different processes among thse \emph{device cloud} involve also roles and authorization. An example for that is access revocation, which could be needed in the following E-Health application case: an emergency occurs requiring customer A to have control over device D, but customer B is using the device D at that time. The access must then be revoked before the device is re-attributed to customer A. In this case, only the Device Owner or Device Operator can take such a decision. Roles and authorization must therefore be handled.
 
 \subsection{Variety of protocols, frameworks, technologies}
 As said above, in the IoT, one remaining problem is the standardization. Each device vendors designs its own proprietary protocols and technologies. In regards to security, the same phenomenon can be observed. The way encryption is done, if it is, is one of the examples. The second example is the communication protocols. A robust security system is supposed to establish reliable channels of communication between the different actors and ensure that no harm can be done to the system. 
@@ -92,7 +94,7 @@ Independently from the devices, authentication and authorization in distributed 
 
 In addition, it should be also taken into consideration that a part of the implementation will eventually run on the devices platforms. 
 
-Within these platforms, resources are scarce and computation power can be low. Hence, heavy-weight framework and protocols should be avoided.
+Within these platforms, resources are limited and computation power can be low. Hence, heavy-weight framework and protocols should be avoided.
 
 %Regarding breaches and potential attack when it comes to distributed systems, it seems that a few possibilities stand out: a Kerberos based system, an OpenID system, or a system based on an OAuth protocol (like OpenID connect). More details will be given is chapter \ref{cha:conceptanddesign}.
 
@@ -106,11 +108,11 @@ This thesis, as aforementioned, is based on a global design of a \emph{device cl
 
 This thesis will provide such a framework for Pools of dynamically provisioned devices (the so called \emph{device cloud}). This framework will also be implemented and integrated into the already existing implementation.
 
-The protocols (communication, encryption, etc) will be specified, as well as the methods provided by the framework. The authentication and authorization framework designed here will be based on OAuth 2.0 and OpenID Connect. This choice is explained further in Chapter \ref{cha:03:design_concept}. 
+The protocols (communication, encryption, etc) will be specified, as well as the methods provided by the framework. The authentication and authorization framework designed here will be based on OpenID Connect. This choice is explained further in Chapter \ref{cha:03:design_concept}. 
 
-The implementation encompass both a User Directory (server-side) and different client-sides. The User Directory is the main component of the authentication framework and allows among other every Domain Operator to authenticate other actors of the \emph{device cloud}. It is maintained locally by every Domain Operator for authenticating their own "users" (which can be one of the four entities described above). The User Directory used in the \emph{device cloud} should have the same implementation for every Domain Operator (in particular Root and non-Root Domain Operator), and thus should implement the required level of abstraction to be used indifferently in any Operator.
+The implementation encompasses both a User Directory (server-side) and different client-sides. The User Directory is the main component of the authentication framework and allows among other every Domain Operator to authenticate other actors of the \emph{device cloud}. It is maintained locally by every Domain Operator for authenticating their own "users" (which can be one of the four entities described above). The User Directory used in the \emph{device cloud} should have the same implementation for every Domain Operator (in particular Root and non-Root Domain Operator), and thus should implement the required level of abstraction to be used indifferently in any Operator.
 
-For the system to be complete, different client sides (requesting authentication, etc) should be also implemented. Those clients will for example be used by the vendors or the consumers and will communicate with the User Directory of their Operator. As said above, a client should be deployed onto scare-resources platforms (for aggregators for example) and should be thus be kept as light as possible. However, the Clients created during this thesis were used only for testing purposes, and will therefore not be presented. 
+For the system to be complete, different client sides (requesting authentication, etc) should be also implemented. Those clients will for example be used by the vendors or the consumers and will communicate with the User Directory of their Operator. As said above, a client should be deployed onto limited-resources platforms (for aggregators for example) and should be thus be kept as light as possible. However, the Clients created during this thesis were used only for testing purposes, and will therefore not be presented. 
 
 It should also be decided if the User Directory relies on a dedicated database (storing users, session information) or if it should be wrapped onto an existing IAM (Identity and Access Management) solution, as an LDAP for instance. In our case, the implementation of the authorization and authentication framework is based on a LDAP.
 
@@ -135,7 +137,7 @@ As for the User Directory, the design should respond to the issues 1, 6 and 7. T
 
 Handling with insiders attacks is more about predicting and detecting than preventing, and is based on observation of patterns and users behavior that are not visible to the User Directory\cite{Schultz2002}. However, it can be ensured that an authorized participant cannot access protected information with which it could harm the system.
 
-Hacking attacks, Espionage and Data loss or corruption can be handled through data encryption, signatures, or other security standards (handling SQL injection, XSS attacks, etc). Thus, it must be ensured that the User Directory provides a sufficient security level in regards to those issues, while being easily integrable into the global design. 
+Hacking attacks, Espionage and Data loss or corruption can be handled through data encryption, signatures, or other security standards (handling SQL injection, XSS attacks, etc). Thus, it must be ensured that the User Directory provides a sufficient security level in regards to those issues.
 
 
 \section{Outline}
@@ -147,7 +149,7 @@ Sections 4 analyses the protocol elaborated in the last section and try to prove
 
 Chapter 5 will illustrate how such a protocol can be implemented. Implementation choices (like the use of a LDAP) will be explained as well as the structure of the final solution.
 
-This thesis will finally be concluded by a summary of the work realized, and will propose possible future evolution from which the \emph{device cloud} could benefit from.
+This thesis will finally be concluded by a summary of the work realized, and will propose possible future evolution from which the \emph{device cloud} could benefit.
 
 
 

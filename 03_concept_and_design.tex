@@ -9,8 +9,8 @@ Nevertheless, in a more restrained environment like the \emph{device cloud}, whi
 
 Afterwards, the methods and interfaces of the framework will be described, and a complete example will be detailed.
 
-\section{Initial Requirement}
-It has already been explained in chapter \ref{cha:introduction} that the code would eventually be ran on devices platform, where resources are scarce. Thus, heavy-weight library and frameworks are to be avoided.
+\section{Requirement Analysis}
+It has already been explained in chapter \ref{cha:introduction} that the code would eventually be ran on devices platform, where resources are limited. Thus, heavy-weight library and frameworks are to be avoided.
 
 The \emph{device cloud} presents another particularity. Indeed, aggregators are supposed to dynamically download the different device drivers and to execute the drivers code, also dynamically. The solution that has been chosen to respond to this need was the OGSi Alliance specification (formerly OSGi: Open Services Gateway initiative), which describes a modular system and a service platform for the Java programming language that implements a complete and dynamic component model. With this, it is possible to install, start, stop or uninstall bundles remotely and without requiring a reboot. In this context, a bundle is a group of Java classes (a jar, for example) and additional resources.
 
@@ -18,36 +18,40 @@ To transmit the bundles to the aggregators, the chosen solution was to use a Web
 
 Besides, most of the frameworks already existing are using the http/https schemes. OpenID Connect is originally, for example, a RESTful API. In the same way, many framework use HTTP Redirect 302 responses to redirect an End-User to the different actors. But Websocket doesn't provide default support for redirection. It must be done on the application layer. The specifications will therefore have to be adapted to the WebSocket architecture. 
 
-\section{The Security Framework}
+Finally, as already mentioned, trust is for any distributed system a precondition for a successful functioning. In the \emph{device cloud} too, the different entities don't trust each other from the beginning. The Root Domain, in the other end, must be trusted by any other entity that communicates with him. Further on, it will be then assumed that every Domain knows how to contact the Root Domain, that it trusts the information coming from the Root Domain, and that the Root Domain will host every service that must be globally trusted (if SSL is used, the Root Domain must logically be the CA). The other trust relationships between entities will all derive from this initial trust precondition.
+
+\section{Security Framework - Overall Concept}
 \label{sec:04_framework}
 
-The terminology used later on is based on the one used by existing frameworks (see \ref{02_authentication}). We thus define:
+The terminology used later on is partially based on the one used by existing frameworks (see \ref{02_authentication}) and partially on the \emph{device could} terminology. We thus define:
 \begin{itemize}
-	\item \textbf{The End-User}: a participant of the \emph{device cloud} that can be authenticated. The End-User can be a Consumer, a Vendor, an Operator (Consumer or Domain Operator), or an Aggregator.
-	\item \textbf{The Client}: Client application that requires End-User authentication. They act for the End-User as service providers. In the \emph{device cloud}, client are necessarily Operators (Consumer and Domain Operators).
-	\item \textbf{The Identity Provider: } the entity that performs authentication of End-Users for Client. Domain Operators and the Root Domain Operator are the only IdPs of the \emph{device cloud}. 
+	\item \textbf{The Principal}: a participant of the \emph{device cloud} that can be authenticated. The Principal can be a Consumer, a Vendor, an Operator (Consumer or Domain Operator), or an Aggregator.
+	\item \textbf{The Client}: Client application that requires Principal authentication. They act for the Principal as service providers. In the \emph{device cloud}, client are necessarily Operators (Consumer and Domain Operators).
+	\item \textbf{The Identity Provider IdP: } the entity that performs authentication of Principals for Client. Domain Operators and the Root Domain Operator are the only IdPs of the \emph{device cloud}. 
 \end{itemize}
 
 The framework defines for the Identity Provider a unique public endpoint, reachable only over a secured communication channel. This endpoint must respond to 4 different type of requests which are:
 
 \begin{description}
-	\item[\textit{Authenticate}]: An End-User is authenticated. Its information is checked, and if valid, a session is opened. The method returns the session ID of the so-opened session.
-	\item[\textit{Delegated Authentication}]: An End-User is authenticated on behalf of a client (a third-party service provider). The information of the client is checked (with this request, the client can for example specify a return address to which the result must eventually be sent), and if valid, the user is authenticated and a proof of the End-user validity is created. This method returns this proof, in form of a token, signed by the IdP.
-	\item[\textit{Get Consumer profile}]: A consumer profile is asked by an Entity. If this entity is authenticated and has the Read-Only or Read-Write right, then the profile is returned.
-	\item[\textit{Get Protocol URI}]: An entity wants to know how to contact a certain Operator. It requests the protocol URI defined in \ref{tab:02_entities} of this Operator.
+	\item[\textit{Authenticate}]: A Principal is authenticated. Its information is checked, and if valid, a session is opened. The method returns the session ID of the so-opened session.
+	\item[\textit{Delegated Authentication}]: A Principal is authenticated on behalf of a Client. The information of the client is checked (with this request, the Client can for example specify a return address to which the result must eventually be sent), and if valid, the user is authenticated and a proof of the Principal validity is created. This proof is returned, in form of a token, signed by the IdP.
+	\item[\textit{Get Consumer profile}]: A consumer profile is asked by an Entity. If this entity is authenticated and has the corresponding rights (see section \ref{03_authorizing}), then the profile is returned.
+	\item[\textit{Get Protocol URI}]: An entity wants to know how to contact a certain Operator. It requests the protocol URI defined in \ref{tab:02_entities} of this Operator. Again, the rights of the requesting entity are checked.
 \end{description}
 
-The two first requests are related to pure authentication as specified in the previous chapters. In one case, the authentication is done in a shared way, i.e. for a client (any Operator of the \emph{device cloud}), whereas in the other case, the authentication is done in a direct way. The consumer profile can also be requested by any entity which has the right to do so.
+The two first requests are related to pure authentication as specified in the previous chapters. In one case, the authentication is done in a shared way, i.e. for a Client (any Operator of the \emph{device cloud}), whereas in the other case, the authentication is done in a direct way. A consumer profile can also be requested by any entity which has the right to do so.
 
-To those three previous requests, a fourth one has been added: \textit{Get Protocol URI}. Indeed, in a distributed network, the nodes need to know how to contact their peers. Before all in a shared authentication context: If an End-User registered in an IdP A contacts a Client which doesn't know A, then the authentication cannot be achieved. The Client must be able to retrieve how to communicate with the IdP A.
+To those three previous requests, a fourth one has been added: \textit{Get Protocol URI}. Indeed, in a distributed network, the nodes need to know how to contact their peers. Before all in a shared authentication context: If a Principal registered in an IdP A contacts a Client which doesn't know A, then the authentication cannot be achieved. The Client must be able to retrieve how to communicate with the IdP A.
 
-In the existing applications, this is done either by statically configuring every nodes to know their neighbors, or through a dynamic services discovery process (OpenID Connect defines the OpenID Connect Discovery service, Kerberos implements also a Kerberos Discovery process, etc). In the \emph{device cloud}, one can take advantage of the hierarchical structure. The Root Domain is supposed to know every Operators within the \emph{device cloud}, so such a discovery process can be for the authentication and authorization framework replaced by another request of type: \textit{Get Protocol URI}.
+In the existing applications, this is done either by statically configuring every nodes to know their neighbors, or through a dynamic services discovery process (OpenID Connect defines the OpenID Connect Discovery service, Kerberos also implement a Kerberos Discovery process, etc). In the \emph{device cloud}, one can take advantage of the hierarchical structure. The Root Domain is supposed to know every Operators within the \emph{device cloud}, so such a discovery process can be for the authentication and authorization framework be replaced by another request of type: \textit{Get Protocol URI}.
 
-In addition to allowing Clients to retrieve the IdPs communication addresses, it also allows the IdPs to partially check the information coming from the Clients during the \textit{Delegated Authentication} process. If the return address specified by a Client is not contained by the result of a \textit{Get Protocol URI} request to the Root Domain, the Client is not considered as a valid Operator of the \emph{device cloud}.
+In addition to enabling Clients to retrieve the IdPs communication addresses, it also allows the IdPs to partially check the information coming from the Clients during the \textit{Delegated Authentication} process. The Clients specify an address to which the IdP's response must be sent. But since Clients are Operators, they have a ProtocolURI handled by the Root Domain. Therefore, if the return address specified by a Client is not contained by the result of a \textit{Get Protocol URI} request to the Root Domain, the Client is not considered as a valid Operator of the \emph{device cloud}.
 
 \vspace{2em}
 
-To respond to these requests, the IdP must implement 4 corresponding methods, above described. It must be here noted,that the interface shows a sufficient level of abstraction for any security implementation to be used (Kerberos, OpenID Connect, ect). \textit{authenticatePrincipalForThirdParty}, for example takes as argument a Map that could contain any specific parameters. That way, the choices made further on (in the design and implementation phases) could be replaced with minimal efforts. 
+To respond to these requests, the IdP must implement 4 corresponding methods, listed below. It must be here noted, that the interface shows a sufficient level of abstraction for any security implementation to be used (Kerberos, OpenID Connect, ect). \textit{authenticatePrincipalForThirdParty}, for example takes as argument a Map that could contain any specific parameters. That way, the choices made further on (in the design and implementation phases) could be replaced with minimal efforts. 
+
+\refstepcounter{foo}\label{interface_methods}
 
 \lstset{language=Java}
 \begin{lstlisting}
@@ -77,18 +81,18 @@ public RequestResult getCustomerProfile(String customerID);
 public RequestResult getProtocolUris(String operatorID);
 \end{lstlisting}
 
-As already explained, it is possible, with the methods definition above listed, to plug different security implementation, like OpenID Connect or Kerberos. The next sections will explain the choices made in regards to the authentication and authorization framework.
+It is thus possible, with the methods definition above described, to utilize different security implementation, like OpenID Connect or Kerberos. The next sections will explain the choices made in regards to the authentication and authorization framework.
 
-\section{The Security Framework - Authentication}
+\section{Authentication Framework}
 
 \subsection{Technological choice}
 The basic design established so far has the sufficient level of abstraction for any security implementation to be used. However, for a more detailed description of the design, choices must be met.
 
 The authentication and authorization framework developed here is indeed based on existing security frameworks, as presented in sections \ref{02_authentication} and \ref{02_authorization}. Obviously, a shared authentication framework is needed here, as a Single-Sign-On System, a Federated Identity Management or a trust-based system.
 
-Considering only the age of the different frameworks and their global resiliency, a few stood out: Kerberos\ref{sec:02_Kerberos}, OpenID 2.0 and OpenID Connect\ref{02_OpenID}, an OAuth 2.0 based system\ref{02_OAuth}, and SAML\ref{02_SAML}.
+Considering only the age of the different frameworks, their global resiliency, and how they could fit to the \emph{device cloud} architecture (with Domains as IdP, Operators as Clients), a few stood out: Kerberos\ref{sec:02_Kerberos}, OpenID 2.0 and OpenID Connect\ref{02_OpenID}, an OAuth 2.0 based system\ref{02_OAuth}, and SAML\ref{02_SAML}.
 
-It must be here understood, that in the \emph{device cloud}, the users identities themselves don't have to be shared. Only the authenticity of a user, i.e. if the user is authenticated within a \emph{device cloud} Identity Provider, must be shared. Hence, solutions whose FIM capability induces an important overhead or heavy dependencies, like Shibboleth (already based on SAML), should be avoided.
+It must be here understood, that in the \emph{device cloud}, the users identities themselves don't have to be shared. Only the authenticity of a user, i.e. if the user is authenticated within a \emph{device cloud} Identity Provider, must be shared. Hence, solutions whose FIM capability induces an important overhead or heavy dependencies should be avoided.
 
 SAML is a widespread solution for SSO and FIM, where the different security assumptions as well as the identity characteristics of a user are shared through key-value xml-elements of the following type:
 
@@ -107,7 +111,9 @@ SAML is a widespread solution for SSO and FIM, where the different security assu
 \end{lstlisting}
 \end{minipage}
 
-Thus, if no attributes are shared, there will be no overhead induced. SAML's only drawback is that it is based on XML files. It requires complex XML signing and parsing operations that might slow some components down. Indeed, in the SAML workflow, the End-User is carrying the different messages between the Identity Provider IdP and the client RP. Those, upon receipt of a request, construct the response and redirect the End-User (normally with an HTTP 302 Redirect) and the XML files attached. But as explained above, the use of WebSocket will have the End-User parse the response and construct the XML files before sending it over. For this reason, SAML has been first ruled out.
+Thus, if no attributes are shared, there will be no overhead induced. SAML's only drawback is that it is based on XML files. It requires complex XML signing and parsing operations that might slow some components down. Indeed, in the SAML workflow, the Principal is carrying the different messages between the Identity Provider IdP and the client RP. Those, upon receipt of a request, construct the response and redirect the Principal (normally with an HTTP 302 Redirect) and the XML files attached. But as explained above, the use of WebSocket will have the Principal parse the response and construct the XML files before sending it over. For this reason, SAML has been first ruled out.
+
+Considering what has already been said about the need for simplicity (no heavy dependencies, etc) and this last argument, Shibboleth was also ruled out (it is based on SAML). 
 
 Kerberos is still a major solution in authentication frameworks, is a mature framework, since it as been used for more than 2 decades, and extended resources can be found. Besides, Kerberos requires a central authority hosting both the Ticket Granting Server TGS and the Key Distribution Center KDC, and would thus easily fit to the \emph{device cloud} architecture and its Root Domain Operator. However, Kerberos shows also several significant drawbacks. First, Kerberos has strict time requirements. In the default configuration per MIT, the different clocks must have less than 5 minutes difference, which require an important synchronization effort. Secondly, it requires the Root Domain to have a great organizational and infrastructural capability. It will have to host the KDC, the TGS, and organize the PKI (certificate creation, revocation, etc). Concerning this last point, each network service which requires a different host name will need its own set of Kerberos keys. This complicates virtual hosting and clusters.
 
@@ -124,30 +130,30 @@ It has been therefore decided, that the authentication framework would be based 
 \subsection{TLS-SSL, an inevitable choice}
 In every secure application, the data is encrypted. It doesn't only protect the application from being hacked, it also ensure data privacy (it prevents any form of eavesdropping), which was one the concern presented in the introduction. Reviewing the specification of the main authentication frameworks presented above, all require or recommend the usage of encryption.
 
-In the OpenID Connect Documentation, the use of the https scheme is sometimes required, sometimes recommended. In the framework, messages will then be transfered over the wss scheme, i.e. WebSocket over TLS/SSL.
+In the OpenID Connect Documentation, the use of the https scheme is sometimes required, sometimes recommended. In the framework, messages will then be transfered over the wss scheme, i.e. WebSocket over TLS/SSL, for every communication. All incoming connection over an insecure channel must be terminated.
 
-As said above, the use of TLS is perfectly adapted to the architecture of the \emph{device cloud}. The Root Domain will create, deliver, and revoke the certificates of the different entities and act as the only valid Certificate Authority of the \emph{device cloud}.
+The use of TLS is perfectly adapted to the architecture of the \emph{device cloud}. The Root Domain will create, deliver, and revoke the certificates of the different entities and act as the only valid Certificate Authority of the \emph{device cloud}.
 
 \subsection{Authentication mode}
 \label{sec:03_auth_mode}
 
 The authentication of a principal relies on its capability to prove its validity and authenticity to its Domain Operator. This can be done by a shared knowledge between the principal and the Domain Operator (Proof by knowledge), by the possession of an object that only the principal is supposed to have (Proof by possession), or by something that the user is or does (Proof by property).
 
-Some of the principal to authenticate, namely the operators and the aggregators, aren't human beings. This makes it far more complicated to set up an authentication method with proof by knowledge. Besides, proof by knowledge is often weak in itself, because the knowledge chosen by the users, if too simple, is easy to guess.
+Some of the principals to authenticate, namely the operators and the aggregators, aren't human beings. This makes it far more complicated to set up an authentication method with proof by knowledge. Besides, proof by knowledge is often weak in itself, because the knowledge chosen by the users, if too simple, is easy to guess.
 
 In the same way, proof by property is hard to achieve with non-human entities. One cannot use DNA comparison, iris or fingerprint recognition. Anyway, in the context the \emph{device cloud}, which is a cloud service, it appears to be not flexible enough.
 
-The best way to authenticate the principals is therefore the proof by possession. Based on the architecture already defined, an obvious choice stands out. Indeed, the use of TLS/SSL enables the so-called SSL Certificate authentication. As explained in the introduction, TLS/SSL originally only authenticate the server to the End-User, but if both entities have a certificate signed by a Certificate Authority, mutual authentication can be performed. It doesn't mean that the server knows directly which End-User it is communicating with, but only that this End-User is a valid entity of the \emph{device cloud}, since it has a valid certificate.
+The best way to authenticate the principals is therefore the proof by possession. Based on the architecture already defined, an obvious choice stands out. Indeed, the use of TLS/SSL enables the so-called SSL Certificate authentication. As explained in the introduction, TLS/SSL originally only authenticate the server to the Principal, but if both entities have a certificate signed by a Certificate Authority, mutual authentication can be performed. It doesn't mean that the server knows directly which Principal it is communicating with, but only that this Principal is a valid entity of the \emph{device cloud}, since it has a valid certificate.
 
-To perform a true authentication, the server can then extract the End-User identifier from the certificate. This has been the solution chosen for the authentication framework. It is supposed that the Root Domain will deliver signed certificates to the different entities, containing among other the entities IDs.
+To perform a true authentication, the server can then extract the Principal identifier from the certificate. This has been the solution chosen for the authentication framework. It is supposed that the Root Domain will deliver signed certificates to the different entities, containing among other the entities IDs.
 
-How those certificates are effectively created, delivered, or revoked is out of the scope of this thesis. It is ensured though, that the certificates can be delivered in a secure way without compromising any critical information in the process. For example, the creation of an End-User account could be the result of a request over a TLS/SSL connection. This SSL connection wouldn't be configured to require mutual authentication, but only server authentication. Any data transfered after the SSL handshake will be then only understood by the correct End-User.
+How those certificates are effectively created, delivered, or revoked is out of the scope of this thesis. It is ensured though, that the certificates can be delivered in a secure way without compromising any critical information in the process. For example, the creation of an Principal account could be the result of a request over a TLS/SSL connection. This SSL connection wouldn't be configured to require mutual authentication, but only server authentication. Any data transfered after the SSL handshake will be then only understood by the correct actors (Principal and IdP). The final step could then be the transmission of the certificate to the Principal.
 
-Finally, even if SSL certificate authentication is the default authentication mode in the framework, one still can add other proofs to validate the identity of a principal. Subsequently, it has been decided to let the possibility to specify an additional type of proof, like password for example. This could be set up for enhancing the security regarding the human entities as the consumers, and can be customized by every Domain.
+Finally, even if SSL certificate authentication is the default authentication mode in the framework, one still can add other proofs to validate the identity of a Principal. Subsequently, it has been decided to let the possibility to specify an additional type of proof, like password for example. This could be set up to enhance the security for human entities as the Consumers, and can be customized by every Domain.
 
 \subsection{Principal Persistence}
 
-As evoked earlier, persisting principals within a Domain can be done either with a dedicated database, or with an existing IAM solution.The Domain Operator will create new principals and verify the validity of incoming connections with this persistence system.
+As evoked earlier, persisting Principals within a Domain can be done either with a dedicated database, or with an existing IAM solution.The Domain Operator will create new Principals and verify the validity of incoming connections with this persistence system.
 
 The framework let the Domains decide which persistence solution they want to implement. Nonetheless, several properties are specified:
 
@@ -156,10 +162,10 @@ The framework let the Domains decide which persistence solution they want to imp
 	\item The communication channel with the persistence system must be secured with TLS/SSL
 	\item The Domain Operator must be the only entity with access to the persistence system, i.e. only one user has the privileges to modify and read the data
 	\item As a subset of the measures that one can met for the previous requirement, Host filtering should be enabled to prevent anyone else to even connect to the persistence system. However, enabling it will never be a sufficient condition. A program running on the same host as the User Directory but with other privileges could access the LDAP, or if NAT (Network address translation) is used, any host sharing the same external IP also could.
-	\item The persistence of principals and the persistence of any other data should be kept separated into two different systems. This is done to reduce the surface attack that a hacker can have on the persistence system.
+	\item The persistence of Principals and the persistence of any other data should be kept separated into two different systems. This permits to reduce the surface attack that a hacker can have on the persistence system.
 \end{itemize}
 
-\section{The Security Framework - Authorization}
+\section{Authorization Framework}
 \label{03_authorizing}
 
 \subsection{Access Control Model}
@@ -179,9 +185,9 @@ The following set of actions is defined:
 \end{itemize} 
 
 \vspace{0.5em}
-The table \ref{tab:access_control} lists the different actions and the corresponding rights. The only one that can access the principals for any action is the EntityOwner. In the \emph{device cloud}, there are the Domain Operator to which the principals are subscribed.
+The table \ref{tab:access_control} lists the different actions and the corresponding rights. The only one that can access the Principals entities for any action is the EntityOperator. In the \emph{device cloud}, this is the Domain Operator in which the Principals are subscribed.
 
-Regarding the Consumer Profile, the only one that can create, remove or update (Read-Write access) is quite logically the consumer owning the profile. However, its profile must be readable for the entities that manage the consumer or can interact with him. For this reason, two groups of users have been added to the ones allowed to read the profile. In the first place, the EntityOperator of the profile, and in the second place, a group of users defined by the consumer itself.
+Regarding the Consumer Profile, the only one that can create, remove or update (Read-Write access) is quite logically the Consumer owning the profile. However, its profile must be readable for the entities that manage the Consumer or can interact with him. For this reason, two groups of users have been added to the ones allowed to read the profile. In the first place, the EntityOperator of the profile, and in the second place, a group of users defined by the Consumer itself.
 
  %	 \setlength{\extrarowheight}{15pt}
  \begin{table}[htpb]
@@ -202,7 +208,7 @@ Regarding the Consumer Profile, the only one that can create, remove or update (
  		\cellcolor{LightGray}{Delete}
  		\\ \hline
  		
- 		\cellcolor{LightGray}principal & \textbullet \quad EntityOwner. \linebreak \linebreak \textbullet \quad For the property protocolURI of the operators: every operator (see section \ref{sec:04_framework}) & EntityOwner & EntityOwner & EntityOwner
+ 		\cellcolor{LightGray}principal & \textbullet \quad EntityOperator. \linebreak \linebreak \textbullet \quad For the property protocolURI of the operators: every operator (see section \ref{sec:04_framework}) & EntityOwner & EntityOwner & EntityOwner
  		\\ \hline
  		\multirow{3}{*}{\cellcolor{LightGray}} & 
  		\multicolumn{1}{p{0.8\textwidth/9*2}|}{\textbullet \quad EntityOwner (the consumer linked to the profile)} & 
@@ -236,10 +242,10 @@ Since it was decided to use OpenID Connect for authentication, the framework for
 
 \begin{enumerate}
 	\item The Client RP (like a Consumer Operator) asks the Authorization Server a consumer profile.
-	\item The Authorization Server asks the consumer if it allows the client to access its profile.
+	\item The Authorization Server asks the Consumer if it allows the Client to access its profile.
 	\item A Grant Token is returned to the Client.
 	\item The client authenticates to the Authorization Server and exchanges its Grant Token against an Access Token.
-	\item The client requests the consumer profile from the Resource Server using its Access Token.
+	\item The Client requests the consumer profile from the Resource Server using its Access Token.
 \end{enumerate}
 
 This approach has two main drawbacks. Indeed, it requires the consumer to express its consent every time another entity wants to access its profile. This might work well in the www word, because the user is connected by the time it is asked for its consent (when a service wants to access the facebook profiles photos for example), but in the \emph{device cloud}, since devices are provisioned dynamically, an entity could want to check a consumer profile at any time.
@@ -250,19 +256,19 @@ The chosen solution was therefore to use a static access control management, whe
 
 \subsection{Entities and their authorization properties persistence}
 \label{sec:03_database}
-As explained above, any data which is no principal should be persisted in a different persistence system than the one used for authentication (for principals).
+As explained above, any data which is not an Principal should be persisted in a different persistence system than the one used for authentication (for principals).
 
-This way, if the persistence system discussed here is compromised, the data related to the users and their secrets (passwords, etc) won't be disclosed.
+This way, if the persistence system discussed here is compromised, the data related to the Principals and their secrets (passwords, etc) won't be disclosed.
 
-The Consumer profiles and their properties could then be persisted in a simple SQL database for example. However, the persistence system that is used for the data must be secured, exactly like the system used for principals.
+The consumer profiles and their properties could then be persisted in a simple SQL database for example. However, the persistence system that is used for the data must be secured, exactly like the system used for principals.
 
 The following requirements are specified:
 
 \begin{itemize}
-	\item The communication channel with the persistence system must be secured with TLS/SSL
 	\item The Domain Operator must be the only entity with access to the persistence system, i.e. only one user has the privileges to modify and read the data
 	\item Host filtering should be enabled to prevent anyone else to even connect to the persistence system
-	\item Private and sensitive data like the various sets of allowed users should be encrypted. The encryption process used is not specified
+	\item The communication channel with the persistence system might be secured with TLS/SSL
+	\item Private and sensitive data like the various sets of allowed users might be encrypted. The encryption process used is not specified
 \end{itemize}
 
 One really secure way of providing secure communication channels and encrypted data would be to always use TLS/SSL for communicating with the database, and put the database on an encrypted hard drive. Of course, extra security measures have to be met for ensuring that the decryption key can't be easily disclosed.
@@ -272,7 +278,7 @@ One really secure way of providing secure communication channels and encrypted d
 \section{An example}
 Let's consider a complex case in the \emph{device cloud} and apply the design to it.
 
-Most of the time, End-Users like Consumers or Aggregators will stay within their Domain. However, in case where a consumer wants a device that is not operated by its Domain, the requests can span domains.
+Most of the time, Principals like Consumers or Aggregators will stay within their Domain. However, in case where a consumer wants a device that is not operated by its Domain, the requests can span domains.
 
 Let's then consider the Consumer C, its Consumer Operator CO1, their Domain Operator DO, the Root Domain RD, and the remote Consumer Operator which operates the required device, CO2.
 
@@ -300,10 +306,10 @@ The process of provisioning the device, depicted in fig\ref{fig:example}, would 
 \end{figure}
 
 \vspace{1em}
-In the process, the only two assumption made are that every entities trusts the Root Domain (any communication is done over a secure channel, where entities certificate must be validated by the root domain certificate) and that the various Operators know how to contact the Root Domain Operator. From those two assumptions, it will later on proved that the design is secure, or at least robust (the zero-risk level doesn't exist in security)\ref{cha:evaluation}.
+In the process, the only two assumptions made are that every entities trusts the Root Domain (any communication is done over a secure channel, where entities certificates must be validated by the Root Domain certificate) and that the various Operators know how to contact the Root Domain Operator. From those two assumptions, it will later on proved that the design is secure, or at least robust (the zero-risk level doesn't exist in security)\ref{cha:evaluation}.
 
-The possibility to add additional step when authenticating a principal is also given, as shown in Fig \ref{fig:example_a}. For instance, the IdP could ask from the End-User to sign a message with another key system. Even sophisticated features like One-Time Passwords (a Consumer would receive a one time code by SMS) could be considered. 
+The possibility to add additional step when authenticating a Principal is also given, as shown in Fig \ref{fig:example_a}. For instance, the IdP could ask the Principal to sign a message with another key. Even sophisticated features like One-Time Passwords (a Consumer would receive a one time code by SMS) could be considered. 
 
-Also, it is assumed that the End-User can send its credentials when redirected from the third-party to the IdP. In a normal http environment, the End-User only conveys the message when redirected, but since Websocket redirection are handled on the application layer, this would not be a problem. However, if a End-User forgets to attach the required data, the IdP can request it, thus leading to additional steps.
+Also, it is assumed that the Principal can send its credentials when redirected from the Client to the IdP. In a normal http environment, the Principal only conveys the message when redirected, but since Websocket redirection are handled on the application layer, this would not be a problem. However, if a Principal forgets to attach the required data, the IdP can request it, thus leading to additional steps.
 
 

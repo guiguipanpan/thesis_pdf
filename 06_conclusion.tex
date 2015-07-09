@@ -1,20 +1,53 @@
 \chapter{Conclusion}
 \label{cha:conclusion}
 
-This thesis presented and evaluated an authentication and authorization framework for  Pools of dynamically provisioned devices. This chapter concludes the thesis with a summary of the achieved work and proposes as well a few leads for possible future works.
+This thesis presented and evaluated an authentication and authorization framework for  Pools of dynamically provisioned devices. This chapter concludes the thesis with a summary of the achieved work and gives as well a few leads for possible future works.
 
 \section{Overview of the thesis}
-The main goal of this thesis was to design a secure global authentication and authorization framework for environment where devices are dynamically shared, like the so-called \emph{device cloud}. The design mainly focused on the security aspects, on one hand, and on the other hand on the specificity of such an environment (i.e. potentially scared resources platform, or the use of Java Serialization). 
+The main goal of this thesis was to design a secure global authentication and authorization framework for environments where devices are dynamically shared, like the so-called \emph{device cloud}. The design mainly focused on the security aspects, on one hand, and on the other hand on the specificities of such an environment. The different entities (the ones that can be authenticated, the Principals, the ones that can perform authentication, the Identity Providers, or the ones that just require the Principal authentication without directly performing it), how those entities are structured (a hierarchical structure with a root element) or technical specificities (potentially limited resources platforms, the use of Java Serialization). 
 
-Several existing frameworks or protocols, on which the solution could have been based on, have been considered. The final call was to use, for a direct authentication, a SSL Certificate authentication with the possibility to add extra authentication methods (like password or One-Time-Password) and for performing authentication for a third-party, to extend the OpenID Connect specification.
+Several existing frameworks or protocols, on which the solution could have been based on, were considered. The final call was to use a SSL Certificate authentication for a direct authentication, with the possibility to add extra authentication methods (like password or One-Time-Password) and to extend the OpenID Connect specification for performing authentication for a Client.
 
-Concerning the authorization, a static process has been chosen: every entity is persisted with attributes like EntityOwner(which represents the owner of the entity) or EntityOperator, on which the authorization to create, read, update or remove the entity is based. A Consumer can for example define a group of allowed user for its own Consumer Profile.
+Concerning the authorization issue, a static process was chosen: every entity is persisted with attributes like EntityOwner(which represents the owner of the entity) or EntityOperator, on which the authorization to create, read, update or remove the entity is based. A Consumer can for example define a group of users who are allowed to read its own Consumer Profile.
+
+Afterwards, the design was evaluated in terms of resiliency, i.e. could one find potential flaws in the framework. For this purpose, the framework has been first logically modeled, then analyzed by an automated procedure. With all three different flaws detection algorithms used, no breaches could be found. The framework designed in this thesis can therefore be deemed as secure.
+
+As a final step, the main component of the framework, an Identity Provider, as well as a few Clients, were implemented and tested. It was done in such a way, that every Identity Provider of the global system could have the same implementation. The way they perform authentication, though, is customizable. In this thesis, a LDAP was chosen with the possibility to add a password in addition to the certificate authentication.
 
 \section{Future research}
 
-\subsection{Integration}
+This sections describes possible direct extensions of the work presented in this thesis, as well as leads for future research.
 
-\subsection{Evaluation}
+\subsection*{A more detailed evaluation}
+\addtocounter{subsection}{1}
+The evaluation proposed in this thesis relies on an automated tool, namely the AVISPA tool. The protocol has been evaluated as secure, but one of the algorithms used for flaws detection (the OMFC algorithm) has not been updated since 2006. 
 
-\subsection{Accountability}
+Other tools for detection could be tried, like the Automated Validation of Trust and Security of Service-oriented ARchitecture (AVANTSSAR) project, which was quite successful since it for example helped discover flaws in the Google SAML protocol. 
+
+An other approach could also be tried, like attempting to logically prove that the framework is secure. For that a logic like the BAN logic, but which would fit the shared authentication infrastructure, should be first found.
+
+Finally, the thesis also aimed at minimizing computational and memory cost for End-Users, since their implementation might be deployed on limited resources platforms. For now, the only evaluation in regards to this concern is that the extra dependencies added by this thesis represent about 2 Mbs, which is little. Nevertheless, this might not be sufficient to assess the good functioning of the solution proposed here. Therefore, a test in real conditions or at least in a realistic simulated environment should be performed.
+
+\subsection*{Accountability}
+\addtocounter{subsection}{1}
+
+The idea of a \emph{device cloud}, a pool of dynamically provisioned devices, can be interesting for an industrial actor but only if seconded by a good billing system. 
+
+	In this context, accountability becomes a matter of first importance. It provides the required capabilities for tracking the activity of an End-User, determining the duration of a session or which services / resources have been accessed. Of course, such processes rely heavily on the authentication process.
+
+Hence, it is a logical follow-up of this thesis. In the \emph{device cloud}, accountability is still an open issue. The following list is an example of several questions that should be answered, : 
+\begin{itemize}
+	\item Who can perform accountability ? Domains, or Operators (Consumer Operator, Domain Operators, both, etc).
+	\item For who is it performed ? (there are different types of End-Users).
+	\item What can be measured, how and when ? (as already seen, the process of provisioning a device can involve quite a lot of actors. At which point of the process is which information saved). 
+	\item How reliable are the accountability processes ?  (If an End-User requests a device, it should first download the drivers and install them. Can this time, during which it is not using the device, 	be estimated ?).
+\end{itemize}
+
+
+\subsection*{Integration}
+\addtocounter{subsection}{1}
+In \citetitle{reference_thesis}, the implementation of \emph{device cloud} basis is already described. But since the authentication and authorization framework was an assumption, anyone could basically access any resource or authenticate. Now that the framework has been designed and implemented, it is possible to simulate the \emph{device cloud} in its entirety. 
+
+It would be the occasion to finally simulate the hierarchical structure, and to perform real conditions tests.
+
 
